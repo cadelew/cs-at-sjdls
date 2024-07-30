@@ -71,7 +71,7 @@ export default function Profile() {
           />
         </a>
 
-        <p className='text-sm self-center'>
+        <p className='text-sm self-center text-center'>
           {imageError ? (
             <span className='text-red-700'>
               Error Uploading Image (file size must be less than 2 MB)
@@ -81,7 +81,11 @@ export default function Profile() {
               {`Uploading: ${imagePercent}%`}
             </span>
           ) : imagePercent === 100 ? (
-            <span className='text-green-700'>Image Uploaded Successfully</span>
+            <span className='text-green-700 '>
+              Image Uploaded Successfully
+              <br />
+              Press the Update Button Below to Save Changes
+            </span>
           ) : (
             ''
           )}
