@@ -34,7 +34,7 @@ export default function ThemeToggle() {
         onChange={handleToggle}
       />
       <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 dark:peer-focus:ring-purple-950 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-transparent after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-black after:border-transparent after:border after:rounded-full after:w-5 after:h-5 after:transition-all dark:border-transparent peer-checked:bg-purple-800"></div>
-      <span className='text-center text-sm font-medium text-black dark:text-gray-300'>
+      <span className='text-center text-sm font-bold text-black dark:text-gray-300'>
         Dark Mode
       </span>
     </label>

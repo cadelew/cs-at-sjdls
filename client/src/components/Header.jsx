@@ -1,6 +1,6 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ThemeToggle from './DarkMode.jsx';
 import Logo from './Logo.jsx';
 
@@ -9,13 +9,24 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCspOpen, setCspOpen] = useState(false);
   const [isCyberOpen, setCyberOpen] = useState(false);
+  const location = useLocation();
+
+  useEffect(() => {
+    setCspOpen(false), setCyberOpen(false);
+  }, [location]);
 
   const toggleCsp = () => {
     setCspOpen((prev) => !prev);
+    if (isCyberOpen) {
+      setCyberOpen(false);
+    }
   };
 
   const toggleCyber = () => {
     setCyberOpen((prev) => !prev);
+    if (isCspOpen) {
+      setCspOpen(false);
+    }
   };
 
   const toggleMenu = () => {
@@ -28,19 +39,19 @@ export default function Header() {
         <Link to='/'>
           <Logo />
         </Link>
-        <div className='flex items-center md:order-2 space-x-3 md:space-x-3 rtl:space-x-reverse'>
-          <ThemeToggle className='pt-1' />
+        <div className='flex justify-center items-center md:order-2 space-x-2 md:space-x-10 rtl:space-x-reverse'>
+          <ThemeToggle className='mb-2' />
           {!currentUser ? (
             <>
               <Link
                 to='/sign-in'
-                className='text-black dark:text-white hover:bg-gray-50 focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-4 py-2 md:px-5 md:py-2.5 dark:hover:bg-gray-700 focus:outline-none dark:focus:ring-gray-800'
+                className='text-black dark:text-white hover:bg-gray-50 focus:ring-4 focus:ring-gray-300 font-bold rounded-lg text-sm px-4 py-2 md:px-5 md:py-2.5 dark:hover:bg-gray-700 focus:outline-none dark:focus:ring-gray-800'
               >
                 Sign In
               </Link>
               <Link
                 to='/sign-up'
-                className='text-white bg-purple-800 hover:bg-purple-950 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-4 py-2 md:px-5 md:py-2.5 dark:bg-purple-800 dark:hover:bg-purple-950 focus:outline-none dark:focus:ring-purple-950'
+                className='text-white bg-purple-800 hover:bg-purple-950 focus:ring-4 focus:ring-purple-300 font-bold rounded-lg text-sm px-4 py-2 md:px-5 md:py-2.5 dark:bg-purple-800 dark:hover:bg-purple-950 focus:outline-none dark:focus:ring-purple-950'
               >
                 Sign Up
               </Link>
@@ -51,14 +62,14 @@ export default function Header() {
                 <img
                   src={currentUser.profilePicture}
                   alt='profile'
-                  className='h-10 w-10 rounded-full object-cover'
+                  className={`h-10 w-10 rounded-full object-cover dark:shadow-[0_0_2px_#fff,inset_0_0_2px_#fff,0_0_5px_#a855f7,0_0_15px_#a855f7,0_0_30px_#a855f7]`}
                 />
               </Link>
               <button
                 onClick={toggleMenu}
                 data-collapse-toggle='mega-menu'
                 type='button'
-                className='inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-black rounded-lg md:hidden focus:outline-none dark:text-white'
+                className='inline-flex items-center py-2 pl-2 pr-0 md:p-2 w-10 h-10 justify-center text-sm text-black rounded-lg md:hidden focus:outline-none dark:text-white'
                 aria-controls='mega-menu'
                 aria-expanded={isMenuOpen}
               >
@@ -112,13 +123,13 @@ export default function Header() {
                 isMenuOpen ? 'block' : 'hidden'
               }`}
             >
-              <ul className='flex flex-col mt-4 font-medium md:flex-row md:mt-0 md:space-x-8 rtl:space-x-reverse'>
+              <ul className='flex flex-col mt-4 font-bold md:flex-row md:mt-0 md:space-x-8 rtl:space-x-reverse'>
                 <li>
                   <button
                     onClick={toggleCsp}
                     id='mega-menu-dropdown-button'
                     data-dropdown-toggle='mega-menu-dropdown'
-                    className='flex items-center justify-between w-full py-2 px-3 font-medium text-black border-b border-black-100 md:w-auto  md:border-0 md:p-0 dark:text-white md:dark:hover:bg-transparent dark:border-white hover:font-bold'
+                    className='flex items-center justify-between w-full py-2 px-3 font-bold text-black border-b border-black-100 md:w-auto md:border-0 md:p-0 dark:text-white md:dark:hover:bg-transparent dark:border-white hover:text-purple-600 dark:hover:text-purple-500'
                   >
                     AP CSP
                     <svg
@@ -139,19 +150,16 @@ export default function Header() {
                   </button>
                   <div
                     id='mega-menu-dropdown'
-                    className={`absolute z-10 grid w-auto grid-cols-2 text-sm bg-white border border-gray-100 rounded-lg shadow-md dark:border-gray-700 md:grid-cols-2 dark:bg-gray-700 ${
-                      isCspOpen ? 'block' : 'hidden'
+                    className={`absolute left-1/2 transform -translate-x-1/2 z-10 w-1/3 text-sm bg-white border border-gray-100 rounded-lg dark:border-purple-500 dark:shadow-[0_0_2px_#fff,inset_0_0_2px_#fff,0_0_5px_#a855f7,0_0_15px_#a855f7,0_0_30px_#a855f7] dark:bg-black ${
+                      isCspOpen ? 'block mt-3' : 'hidden'
                     }`}
                   >
                     <div className='p-4 pb-0 text-gray-900 md:pb-4 dark:text-white'>
-                      <ul
-                        className='space-y-4'
-                        aria-labelledby='mega-menu-dropdown-button'
-                      >
+                      <ul className="flex flex-col md:mx-10 md:flex-row md:space-x-4 md:justify-between aria-labelledby='mega-menu-dropdown-button">
                         <li>
                           <Link
-                            to='#'
-                            className='text-black dark:text-white hover:font-bold'
+                            to='/'
+                            className='text-black dark:text-white hover:text-purple-600 dark:hover:text-purple-500'
                           >
                             CSP Home
                           </Link>
@@ -159,7 +167,7 @@ export default function Header() {
                         <li>
                           <Link
                             to='#'
-                            className='text-black dark:text-white hover:font-bold'
+                            className='text-black dark:text-white hover:text-purple-600 dark:hover:text-purple-500'
                           >
                             Checklist
                           </Link>
@@ -167,7 +175,7 @@ export default function Header() {
                         <li>
                           <Link
                             to='#'
-                            className='text-black dark:text-white hover:font-bold'
+                            className='text-black dark:text-white hover:text-purple-600 dark:hover:text-purple-500'
                           >
                             Review
                           </Link>
@@ -176,12 +184,13 @@ export default function Header() {
                     </div>
                   </div>
                 </li>
+
                 <li>
                   <button
                     onClick={toggleCyber}
                     id='mega-menu-dropdown-button'
                     data-dropdown-toggle='mega-menu-dropdown'
-                    className='flex items-center justify-between w-full py-2 px-3 font-medium text-gray-900 border-b border-gray-100 md:w-auto hover:bg-gray-50 md:hover:bg-transparent md:border-0 md:hover:text-blue-600 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-blue-500 md:dark:hover:bg-transparent dark:border-gray-700'
+                    className='flex items-center justify-between w-full py-2 px-3 font-bold text-black border-b border-black-100 md:w-auto md:border-0 md:p-0 dark:text-white md:dark:hover:bg-transparent dark:border-white hover:text-purple-600 dark:hover:text-purple-500'
                   >
                     Cybersecurity
                     <svg
@@ -202,19 +211,16 @@ export default function Header() {
                   </button>
                   <div
                     id='mega-menu-dropdown'
-                    className={`absolute z-10 grid w-auto grid-cols-2 text-sm bg-white border border-gray-100 rounded-lg shadow-md dark:border-gray-700 md:grid-cols-2 dark:bg-gray-700 ${
-                      isCyberOpen ? 'block' : 'hidden'
+                    className={`absolute left-1/2 transform -translate-x-1/2 z-10 w-1/3 text-sm bg-white border border-gray-100 rounded-lg dark:border-purple-500 dark:shadow-[0_0_2px_#fff,inset_0_0_2px_#fff,0_0_5px_#a855f7,0_0_15px_#a855f7,0_0_30px_#a855f7] dark:bg-black ${
+                      isCyberOpen ? 'block mt-3' : 'hidden'
                     }`}
                   >
                     <div className='p-4 pb-0 text-gray-900 md:pb-4 dark:text-white'>
-                      <ul
-                        className='space-y-4'
-                        aria-labelledby='mega-menu-dropdown-button'
-                      >
+                      <ul className="flex flex-col md:mx-10 md:flex-row md:space-x-4 md:justify-between aria-labelledby='mega-menu-dropdown-button">
                         <li>
                           <Link
                             to='#'
-                            className='text-black dark:text-white hover:font-bold'
+                            className='text-black dark:text-white hover:text-purple-600 dark:hover:text-purple-500'
                           >
                             Cybersecurity Home
                           </Link>
@@ -222,7 +228,7 @@ export default function Header() {
                         <li>
                           <Link
                             to='#'
-                            className='text-black dark:text-white hover:font-bold'
+                            className='text-black dark:text-white hover:text-purple-600 dark:hover:text-purple-500'
                           >
                             Checklist
                           </Link>
@@ -230,7 +236,7 @@ export default function Header() {
                         <li>
                           <Link
                             to='#'
-                            className='text-black dark:text-white hover:font-bold'
+                            className='text-black dark:text-white hover:text-purple-600 dark:hover:text-purple-500'
                           >
                             Environments
                           </Link>
@@ -242,7 +248,7 @@ export default function Header() {
                 <li>
                   <Link
                     to='#'
-                    className='block py-2 px-3 text-gray-900 border-b border-gray-100 hover:bg-gray-50 md:hover:bg-transparent md:border-0 md:hover:text-blue-600 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-blue-500 md:dark:hover:bg-transparent dark:border-gray-700'
+                    className='block py-2 px-3 text-gray-900 border-b border-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-purple-600 md:p-0 dark:text-white md:dark:hover:text-purple-500 dark:hover:text-purple-500 md:dark:hover:bg-transparent dark:border-white'
                   >
                     Resources
                   </Link>
