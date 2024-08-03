@@ -4,12 +4,14 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "preinstall": "npx npm-force-resolutions",
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@heroicons/react": "^2.1.5",
     "@material-tailwind/react": "^2.1.9",
     "@reduxjs/toolkit": "^2.2.6",
     "firebase": "^10.12.4",
@@ -31,5 +33,9 @@
     "postcss": "^8.4.39",
     "tailwindcss": "^3.4.4",
     "vite": "^5.3.1"
+  },
+  "resolutions": {
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
   }
 }
