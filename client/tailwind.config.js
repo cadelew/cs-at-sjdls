@@ -20,8 +20,14 @@ export default {
         'system-ui'
       ],
     },
-    extend: {},
+    extend: {
+      height: {
+        '80vh' : '80vh',
+      }
+    },
   },
-  plugins: [],
+  plugins: [
+    require('daisyui'),
+  ],
   darkMode: 'class'
 }

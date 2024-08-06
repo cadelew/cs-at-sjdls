@@ -6,7 +6,7 @@ const Logo = () => {
     <div className='flex flex-col justify-center items-center'>
       <div className='bg-cover bg-no-repeat w-full'>
         <h1
-          className='text-black text-3xl md:text-3xl uppercase text-center font-extrabold'
+          className='text-black text-2xl md:text-3xl uppercase text-center font-extrabold'
           style={{
             backgroundImage: `url(${purpleRain})`,
             backgroundSize: 'cover',
