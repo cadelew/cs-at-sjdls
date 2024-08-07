@@ -36,9 +36,16 @@ export default function Header() {
   return (
     <nav className='bg-amber-50 dark:bg-black border-transparent'>
       <div className='flex flex-wrap items-center justify-between max-w-screen-xl mx-auto p-4'>
-        <Link to='/'>
-          <Logo />
-        </Link>
+        {!currentUser ? (
+          <Link to='/'>
+            <Logo />
+          </Link>
+        ) : (
+          <Link to='/dashboard'>
+            <Logo />
+          </Link>
+        )}
+
         <div className='flex justify-center items-center md:order-2 space-x-2 md:space-x-10 rtl:space-x-reverse'>
           <ThemeToggle className='mb-2' />
           {!currentUser ? (
