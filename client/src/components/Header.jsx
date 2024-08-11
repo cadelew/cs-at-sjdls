@@ -132,6 +132,14 @@ export default function Header() {
             >
               <ul className='flex flex-col mt-4 font-bold md:flex-row md:mt-0 md:space-x-8 rtl:space-x-reverse'>
                 <li>
+                  <Link
+                    to='getting-started'
+                    className='block py-2 px-3 text-gray-900 border-b border-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-purple-600 md:p-0 dark:text-white md:dark:hover:text-purple-500 dark:hover:text-purple-500 md:dark:hover:bg-transparent dark:border-white'
+                  >
+                    Getting Started
+                  </Link>
+                </li>
+                <li>
                   <button
                     onClick={toggleCsp}
                     id='mega-menu-dropdown-button'
