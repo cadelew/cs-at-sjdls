@@ -11,14 +11,17 @@ export default function GettingStarted() {
   return (
     <div className='flex justify-center min-h-screen min-w-screen dark:bg-black bg-amber-50'>
       {/* <div className='flex justify-center min-h-screen'> */}
-      <div className='pt-20 md:w-1/2 w-full text-black dark:text-white'>
+      <div
+        className='pt-20 md:w-1/2 w-full text-black dark:text-white'
+        id='overview'
+      >
         <h1 className='mb-7 relative py-4 flex justify-center items-center text-black dark:bg-gradient-to-r dark:from-purple-800 dark:via-purple-500 dark:to-purple-800 bg-clip-text text-6xl font-extrabold dark:text-transparent text-center'>
           <span className='absolute hidden inset-0 w-full h-full dark:flex justify-center items-center bg-gradient-to-r blur-xl from-purple-500 via-purple-500 to-purple-500 bg-clip-text text-6xl box-content font-extrabold text-transparent select-none'>
             Getting Started
           </span>
           Getting Started
         </h1>
-        <div id='overview'>
+        <div>
           <h1 className='pb-5 font-bold flex-start text-lg'>Overview</h1>
           <h3 className='flex-start flex-wrap'>
             This is where it all begins! A hands-on introduction to all of the
@@ -30,7 +33,7 @@ export default function GettingStarted() {
         <ul className='flex flex-col justify-center my-10 border-y border-b-0 pt-5  pb-10 dark:border-white border-black'>
           <li
             className='justify-center border-t-inherit pt-5 pb-10 dark:border-white border-black'
-            id='understanding-os '
+            id='understanding-os'
           >
             <h1 className='font-bold text-3xl text-center pb-5'>
               Understanding Operating Systems (OS)
@@ -48,6 +51,13 @@ export default function GettingStarted() {
 
             {/* Windows Section */}
             <h2 className='font-bold text-xl my-5'>Windows</h2>
+            <div className='py-5 flex justify-center'>
+              <img
+                className=' max-h-32'
+                src='https://static.vecteezy.com/system/resources/previews/016/460/828/original/windows-os-logo-top-operating-system-signs-free-png.png'
+                alt='Windows Logo'
+              />
+            </div>
             <h3>
               Windows is the most commonly used operating system, especially in
               businesses, schools, and homes. It's known for its compatibility
@@ -124,6 +134,13 @@ export default function GettingStarted() {
 
             {/* macOS Section */}
             <h2 className='font-bold text-xl my-5'>macOS</h2>
+            <div className='py-5 flex justify-center'>
+              <img
+                className=' max-h-32'
+                src='https://upload.wikimedia.org/wikipedia/commons/c/c9/Finder_Icon_macOS_Big_Sur.png'
+                alt='MacOS Logo'
+              />
+            </div>
             <h3>
               macOS is Apple's operating system, known for its sleek design,
               seamless integration with other Apple devices, and strong security
@@ -195,6 +212,13 @@ export default function GettingStarted() {
               </ul>
             </div>
             <h2 className='font-bold text-xl my-5'>Linux</h2>
+            <div className='py-5 flex justify-center'>
+              <img
+                className=' max-w-64'
+                src='https://pngimg.com/d/linux_PNG29.png'
+                alt='Linux Logo'
+              />
+            </div>
             <h3>
               Linux is an open-source operating system that offers unparalleled
               customization and control. It's widely used by developers,
@@ -272,18 +296,269 @@ export default function GettingStarted() {
           </li>
           <li
             className='justify-center border-y py-10 dark:border-white border-black'
-            id='understanding-os'
+            id='os-winner'
           >
             <h1 className='font-bold text-3xl text-center pb-5'>
               The Clear OS Winner
             </h1>
-            <div className='flex justify-center'>
+            <div className='py-5 flex justify-center'>
               <img
                 className=' max-w-64'
                 src='https://pngimg.com/d/linux_PNG29.png'
+                alt='Linux Logo'
               />
             </div>
-            <h3></h3>
+            <h3>
+              Linux has established itself as the premier operating system for
+              professionals in computer science and cybersecurity. Its
+              unparalleled flexibility and control make it the go-to platform
+              for developing and testing applications, managing security, and
+              running complex simulations. The operating system’s robust toolset
+              includes essential software for development, penetration testing,
+              and forensic analysis, all of which are integral to the industry.
+              Linux's reputation for stability and security further cements its
+              role as the standard choice in environments where reliability and
+              protection are paramount. For those working in these fields, Linux
+              is not just a tool; it is the foundation upon which much of modern
+              technology is built and secured.
+            </h3>
+            <h2 className='font-bold text-xl my-5'>
+              Popular Linux Distributions in Computer Science and Cybersecurity
+            </h2>
+            <h3>
+              Linux comes in various <strong>distributions (distros)</strong>,
+              each tailored to different needs and preferences. In the fields of
+              computer science and cybersecurity, certain distros have become
+              particularly popular due to their specialized tools, stability,
+              and community support. Linux distros have a{' '}
+              <strong> graphical user interface (GUI) </strong>
+              or a <strong>command line interface (CLI)</strong> or both. Here’s
+              a look at some of the main Linux distributions and how they are
+              used by professionals in these fields:
+            </h3>
+
+            <ol className='my-5 space-y-4 text-black list-decimal list-inside dark:text-white'>
+              <li className='text-lg font-semibold'>
+                Ubuntu* (Both Cybersecurity and Computer Science)
+                <div className='py-5 flex justify-center'>
+                  <img
+                    className=' max-h-32'
+                    src='https://seeklogo.com/images/U/ubuntu-logo-8B7C9ED4AD-seeklogo.com.png'
+                    alt='Ubuntu Logo'
+                  />
+                </div>
+                <ul className='text-base font-normal pl-5 ps-5 mt-2 space-y-2 list-disc'>
+                  <li>
+                    <strong>Overview:</strong> Ubuntu is one of the most popular
+                    and user-friendly Linux distributions, known for its ease of
+                    installation and strong community support. It’s often the
+                    first choice for beginners but also widely used by
+                    professionals for development and testing.
+                  </li>
+                  <li>
+                    <strong>Use in Computer Science:</strong> Ubuntu is favored
+                    for its broad software compatibility, making it ideal for
+                    programming, software development, and running various
+                    development environments. It’s also commonly used in
+                    educational settings for teaching Linux basics.
+                  </li>
+                  <li>
+                    <strong>Use in Cybersecurity:</strong> While not
+                    specifically designed for cybersecurity, Ubuntu serves as a
+                    solid foundation for building custom security tools or
+                    running penetration testing frameworks. Its stability and
+                    ease of use make it a reliable choice for general-purpose
+                    cybersecurity tasks.
+                  </li>
+                  <li>
+                    <strong>UI Details:</strong> Ubuntu comes with a
+                    user-friendly GUI by default, typically using the GNOME
+                    desktop environment, making it accessible to users familiar
+                    with graphical interfaces. It also provides a robust CLI,
+                    which is essential for development tasks, scripting, and
+                    system management.
+                  </li>
+                </ul>
+              </li>
+              <li className='text-lg font-semibold'>
+                Kali Linux (Mainly Cybersecurity)
+                <div className='py-5 flex justify-center'>
+                  <img
+                    className=' max-h-32'
+                    src='https://static-00.iconduck.com/assets.00/distributor-logo-kali-linux-icon-2048x2005-dki611fk.png'
+                    alt='Kali Linux Logo'
+                  />
+                </div>
+                <ul className='text-base font-normal ps-5 mt-2 space-y-2 list-disc list-inside'>
+                  <li>
+                    <strong>Overview</strong>: Kali Linux is a specialized
+                    distribution designed specifically for penetration testing,
+                    ethical hacking, and security research. It comes
+                    pre-installed with hundreds of tools tailored for these
+                    purposes.
+                  </li>
+                  <li>
+                    <strong>Use in Computer Science:</strong> While not a
+                    general-purpose development distro, Kali Linux is invaluable
+                    for computer scientists who need to test the security of
+                    their applications or networks. It’s often used in academic
+                    settings to teach students about cybersecurity practices.
+                  </li>
+                  <li>
+                    <strong>Use in Cybersecurity:</strong> Kali is the go-to
+                    distribution for cybersecurity professionals engaged in
+                    penetration testing, vulnerability assessments, and digital
+                    forensics. Its extensive toolset includes Nmap, Metasploit,
+                    Wireshark, and many others, making it an essential platform
+                    for ethical hackers and security researchers.
+                  </li>
+                  <li>
+                    <strong>UI Details:</strong> Kali Linux offers both a GUI
+                    and CLI, with the XFCE desktop environment as its default
+                    GUI. The GUI is particularly useful for navigating the
+                    extensive suite of tools included in Kali, while the CLI is
+                    indispensable for tasks like network scanning, scripting,
+                    and running penetration tests.
+                  </li>
+                </ul>
+              </li>
+              <li className='text-lg font-semibold'>
+                Fedora (Mainly Computer Science and DevOps/IT)
+                <div className='py-5 flex justify-center'>
+                  <img
+                    className=' max-h-24'
+                    src='https://upload.wikimedia.org/wikipedia/commons/thumb/8/8f/Fedora_logo_%282021%29.svg/1200px-Fedora_logo_%282021%29.svg.png'
+                    alt='Fedora Logo'
+                  />
+                </div>
+                <ul className='text-base font-normal ps-5 mt-2 space-y-2 list-disc list-inside'>
+                  <li>
+                    <strong>Overview:</strong> Fedora is a cutting-edge
+                    distribution sponsored by Red Hat, known for integrating the
+                    latest features and technologies. It’s popular among
+                    developers and system administrators who need a stable and
+                    innovative environment.
+                  </li>
+                  <li>
+                    <strong>Use in Computer Science:</strong> Fedora is often
+                    used by developers who want to work with the latest software
+                    and development tools. Its robust package management and
+                    support for containerization technologies like Docker make
+                    it ideal for modern software development.
+                  </li>
+                  <li>
+                    <strong>Use in Cybersecurity:</strong> Fedora is used in
+                    cybersecurity for its reliability and support for security
+                    tools. While not as specialized as Kali Linux, it’s often
+                    employed in environments where both development and security
+                    tasks are performed.
+                  </li>
+                  <li>
+                    <strong>UI Details:</strong> Fedora provides both a GUI and
+                    CLI, with GNOME as its default desktop environment. The GUI
+                    offers a polished and modern user experience, while the CLI
+                    is powerful and widely used for development, system
+                    administration, and container management.
+                  </li>
+                </ul>
+              </li>
+              <li className='text-lg font-semibold'>
+                CentOS
+                <div className='py-5 flex justify-center'>
+                  <img
+                    className=' max-h-32'
+                    src='https://cdn.freebiesupply.com/logos/large/2x/centos-1-logo-png-transparent.png'
+                    alt='centOS logo'
+                  />
+                </div>
+                <ul className='text-base font-normal ps-5 mt-2 space-y-2 list-disc list-inside'>
+                  <li>
+                    <strong>Overview:</strong> CentOS is a community-driven
+                    distribution that is functionally compatible with Red Hat
+                    Enterprise Linux (RHEL). It’s known for its stability and
+                    long-term support, making it a preferred choice for
+                    enterprise environments.
+                  </li>
+                  <li>
+                    <strong>Use in Computer Science:</strong> CentOS is commonly
+                    used in enterprise software development, particularly in
+                    scenarios where stability and long-term support are crucial.
+                    It’s also popular for running servers and developing
+                    applications intended for RHEL environments.
+                  </li>
+                  <li>
+                    <strong>Use in Cybersecurity:</strong> In cybersecurity,
+                    CentOS is used in environments that require a stable,
+                    secure, and reliable platform for running security tools,
+                    managing servers, and deploying enterprise applications. Its
+                    stability makes it a trusted choice for critical
+                    infrastructure.
+                  </li>
+                  <li>
+                    <strong>UI Details:</strong> CentOS includes both a GUI and
+                    CLI, with GNOME as the typical desktop environment for those
+                    who install the GUI. However, it is often used in a CLI-only
+                    mode, particularly on servers where a graphical interface is
+                    unnecessary and the focus is on stability and performance.
+                  </li>
+                </ul>
+              </li>
+              {/* <li className='font-semibold'>
+                Parrot Security OS
+                <div className='py-5 flex justify-center'>
+                  <img
+                    className=' max-h-32'
+                    src='https://cylab.be/storage/blog/205/files/ZyBJGF6lu6YnQ0XM/parrot_logo2.png'
+                  />
+                </div>
+                <ul className='font-normal ps-5 mt-2 space-y-2 list-disc list-inside'>
+                  <li>Again please don't nest lists if you want</li>
+                  <li>Nobody wants to look at this.</li>
+                  <li>I'm upset that we even have to bother styling this.</li>
+                </ul>
+              </li> */}
+              <li className='font-semibold'>
+                Debian*
+                <div className='py-5 flex justify-center'>
+                  <img
+                    className=' max-h-32'
+                    src='https://cdn.iconscout.com/icon/free/png-256/free-debian-2-202378.png?f=webp'
+                    alt='Debian Logo'
+                  />
+                </div>
+                <ul className='font-normal ps-5 mt-2 space-y-2 list-disc list-inside'>
+                  <li>
+                    <strong>Overview:</strong> Debian is one of the oldest and
+                    most stable Linux distributions. It’s known for its rigorous
+                    testing and commitment to free software, making it a
+                    reliable choice for both servers and desktops.
+                  </li>
+                  <li>
+                    <strong>Use in Computer Science:</strong> Debian’s stability
+                    and extensive package repository make it a favorite among
+                    developers who need a reliable and consistent environment.
+                    It’s also used as the base for many other distributions,
+                    including Ubuntu.
+                  </li>
+                  <li>
+                    <strong>Use in Cybersecurity:</strong> While not as
+                    specialized as Kali or Parrot, Debian is used in
+                    cybersecurity for tasks that require a stable and secure
+                    platform. Its robustness makes it suitable for running
+                    security tools, managing servers, and performing system
+                    hardening.
+                  </li>
+                  <li>
+                    <strong>UI Details:</strong> Debian offers both a GUI and
+                    CLI, with multiple desktop environments available, such as
+                    GNOME, KDE, XFCE, and LXDE. Debian is highly flexible,
+                    allowing users to install a minimal CLI-only system or a
+                    full-featured desktop environment depending on their needs.
+                  </li>
+                </ul>
+              </li>
+            </ol>
+            <h1 className='font-bold'>* Used in CyberPatriot competitions</h1>
           </li>
         </ul>
       </div>
