@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard';
 import Header from './components/Header';
 import PrivateRoute from './components/PrivateRoute';
 import GettingStarted from './pages/GettingStarted';
+import TopReturn from './components/TopReturn';
 
 export default function App() {
   return (
@@ -23,6 +24,7 @@ export default function App() {
           <Route path='/getting-started' element={<GettingStarted />} />
         </Route>
       </Routes>
+      <TopReturn />
     </BrowserRouter>
   );
 }
