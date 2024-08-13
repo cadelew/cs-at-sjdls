@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import githubLogo from '../images/github-logo.png';
 
 export default function GettingStarted() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -560,6 +561,311 @@ export default function GettingStarted() {
             </ol>
             <h1 className='font-bold'>* Used in CyberPatriot competitions</h1>
           </li>
+          <li
+            className='justify-center border-t-inherit py-10 dark:border-white border-black'
+            id='what-is-a-vm'
+          >
+            <h1 className='font-bold text-3xl text-center pb-5'>
+              What is a Virtual Machine (VM)?
+            </h1>
+            <div className='py-5 flex justify-center'>
+              <img
+                className=' max-h-24'
+                src='https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/VMware_logo.svg/2560px-VMware_logo.svg.png'
+                alt='VMWare Logo'
+              />
+            </div>
+            <h3 className='py-5'>
+              A virtual machine is an emulation of a computer that runs within
+              your existing OS. It allows you to use another operating system
+              inside of a program on your current operating system (e.g. Running
+              Linux inside of Windows).
+              <span className='block mt-4'>
+                Companies use VMs to optimize resources, reduce costs, and
+                enhance security by running different environments on the same
+                hardware. VMs are essential for testing and development,
+                offering isolated spaces to experiment without affecting the
+                main system. They also play a key role in cybersecurity,
+                providing safe environments for malware analysis and testing
+                security measures. Overall, VMs offer flexibility and efficiency
+                in modern IT infrastructure.
+              </span>
+              <span className='font-semibold block mt-4'>
+                We use virtual machines in PLTW Cybersecurity as well as
+                CyberPatriot.
+              </span>
+            </h3>
+
+            <a
+              className='underline font-semibold hover:text-purple-500'
+              href='https://youtu.be/yIVXjl4SwVo'
+            >
+              Learn More About Virtual Machines Here
+            </a>
+            <h3 className='py-5'>
+              If you want to install a Linux virtual machine, The Odin Project
+              is a free open-source course that teaches full-stack web
+              development. It has a very good tutorial setting up the machine,
+              VSCode, Git, Github, npm, and all other necessities.{' '}
+            </h3>
+            <a
+              className='underline font-semibold hover:text-purple-500'
+              href='https://www.theodinproject.com/'
+            >
+              Link to The Odin Project (Highly Recommend)
+            </a>
+            <h3 className='py-5 font-semibold'>
+              If you are in CyberPatriot, topics about navigating different
+              distros in virtual machines will be covered.
+            </h3>
+          </li>
+          <li
+            className='justify-center border-t py-10 dark:border-white
+            border-black'
+            id='what-is-git'
+          >
+            <h1 className='font-bold text-3xl text-center pb-5'>
+              What is Git (and GitHub)?
+            </h1>
+            <div className='py-5 flex justify-evenly flex-row'>
+              <img
+                className=' max-h-32'
+                src='https://book.git-scm.com/images/logos/downloads/Git-Icon-1788C.png'
+                alt='Git Logo'
+              />
+              <img
+                className='dark:hidden block max-h-32'
+                src='https://pngimg.com/d/github_PNG65.png'
+                alt='GitHub Logo'
+              />
+              <img
+                className='hidden dark:block max-h-32'
+                src={githubLogo}
+                alt='GitHub Logo'
+              />
+            </div>
+            <h3 className='my-5'>
+              Git and GitHub are powerful tools that can greatly enhance the
+              management of your AP Computer Science Create Task project. Git is
+              a version control system that tracks changes to your code,
+              allowing you to experiment and revert to previous versions if
+              needed. It helps you organize your work, making it easier to
+              manage the development process and ensuring that every change is
+              documented.
+              <span className='block mt-4'>
+                GitHub, on the other hand, is an online platform that hosts your
+                Git repositories. It allows you to store your code in the cloud,
+                share it with others, and collaborate on your project in
+                real-time. GitHub also offers tools for issue tracking and
+                project management, helping you stay organized and track your
+                progress. Together, Git and GitHub provide a seamless way to
+                manage, collaborate on, and showcase your Create Task project,
+                ensuring your work is secure, well-organized, and accessible
+                from anywhere.
+              </span>
+              <span className='block mt-5 text-lg font-bold'>
+                Here are some of the benefits of using Git and GitHub:
+              </span>
+            </h3>
+            <ul className='font-normal ps-5 mt-2 space-y-2 list-disc'>
+              <li>
+                <strong>Version Control:</strong> Git tracks every change you
+                make to your code, allowing you to revert to previous versions
+                if needed.
+              </li>
+              <li>
+                <strong>Experimentation:</strong> You can create and test
+                different ideas without fear of losing or overwriting your
+                existing work.
+              </li>
+              <li>
+                <strong>Collaboration:</strong> GitHub allows multiple people to
+                work on the same project simultaneously, making teamwork easy
+                and efficient.
+              </li>
+              <li>
+                <strong>Cloud Storage:</strong> GitHub hosts your project
+                online, ensuring your code is backed up and accessible from any
+                device.
+              </li>
+              <li>
+                <strong>Project Management:</strong> GitHub provides tools for
+                tracking issues, tasks, and progress, helping you stay organized
+                throughout your project.
+              </li>
+              <li>
+                <strong>Documentation:</strong> Both Git and GitHub
+                automatically document the history of your project, which can be
+                useful for reflecting on your development process.
+              </li>
+            </ul>
+            <a
+              className='text-lg block mt-5 font-bold underline hover:text-purple-500'
+              href='https://docs.github.com/en/get-started/start-your-journey/creating-an-account-on-github'
+            >
+              Learn how to set up a GitHub account
+            </a>
+
+            <a
+              className='text-lg block mt-5 font-bold hover:text-purple-500 underline'
+              href='https://www.youtube.com/watch?v=mR9jhYD3bnI'
+            >
+              Once you create your GitHub account, learn how to link it to
+              VSCode with this video.
+            </a>
+          </li>
+          <li
+            className='justify-center border-t py-10 dark:border-white
+            border-black'
+            id='useful-vscode-extensions'
+          >
+            <h1 className='font-bold text-3xl text-center pb-5'>
+              Useful VSCode Extensions
+            </h1>
+            <div className='py-5 flex justify-evenly flex-row'>
+              <img
+                className=' max-h-32'
+                src='https://eamodio.gallerycdn.vsassets.io/extensions/eamodio/gitlens/2024.8.1005/1723280937107/Microsoft.VisualStudio.Services.Icons.Default'
+                alt='GitLense Logo'
+              />
+              <img
+                className='block max-h-32'
+                src='https://usernamehw.gallerycdn.vsassets.io/extensions/usernamehw/errorlens/3.20.0/1719044874383/Microsoft.VisualStudio.Services.Icons.Default'
+                alt='Error Lens Logo'
+              />
+              <img
+                className='block max-h-32'
+                src='https://seeklogo.com/images/P/prettier-logo-D5C5197E37-seeklogo.com.png'
+                alt='Prettier Logo'
+              />
+              <img
+                className='block max-h-32'
+                src='https://kevinrose.gallerycdn.vsassets.io/extensions/kevinrose/vsc-python-indent/1.18.0/1664843036457/Microsoft.VisualStudio.Services.Icons.Default'
+                alt='Python Indent Logo'
+              />
+            </div>
+            <h3 className='my-5'>
+              <span className='block mt-4'></span>
+            </h3>
+            <ol className='my-5 space-y-4 text-black list-decimal list-inside dark:text-white'>
+              <li className='text-lg font-semibold'>
+                Git Lens
+                <div className='py-5 flex justify-center'>
+                  <img
+                    className=' max-h-32'
+                    src='https://eamodio.gallerycdn.vsassets.io/extensions/eamodio/gitlens/2024.8.1005/1723280937107/Microsoft.VisualStudio.Services.Icons.Default'
+                    alt='Git Lens Logo'
+                  />
+                </div>
+                <ul className='text-base font-normal pl-5 ps-5 mt-2 space-y-2 list-disc'>
+                  <li>
+                    <strong>Purpose:</strong> Enhances Git capabilities within
+                    VS Code by providing detailed insights into code changes,
+                    authorship, and history.
+                  </li>
+                  <li>
+                    <strong>Benefits:</strong> Helps track the development
+                    process and understand code evolution, making it easier to
+                    manage and document your project.
+                  </li>
+                </ul>
+              </li>
+              <li className='text-lg font-semibold'>
+                Error Lens
+                <div className='py-5 flex justify-center'>
+                  <img
+                    className=' max-h-32'
+                    src='https://usernamehw.gallerycdn.vsassets.io/extensions/usernamehw/errorlens/3.20.0/1719044874383/Microsoft.VisualStudio.Services.Icons.Default'
+                    alt='Error Lens Logo'
+                  />
+                </div>
+                <ul className='text-base font-normal pl-5 ps-5 mt-2 space-y-2 list-disc'>
+                  <li>
+                    <strong>Purpose:</strong> Displays errors, warnings, and
+                    other diagnostic messages directly inline with your code.
+                  </li>
+                  <li>
+                    <strong>Benefits:</strong> Improves visibility of issues,
+                    allowing for quicker detection and resolution of coding
+                    problems.
+                  </li>
+                </ul>
+              </li>
+              <li className='text-lg font-semibold'>
+                Prettier
+                <div className='py-5 flex justify-center'>
+                  <img
+                    className=' max-h-32'
+                    src='https://seeklogo.com/images/P/prettier-logo-D5C5197E37-seeklogo.com.png'
+                    alt='Prettier Logo'
+                  />
+                </div>
+                <ul className='text-base font-normal pl-5 ps-5 mt-2 space-y-2 list-disc'>
+                  <li>
+                    <strong>Purpose:</strong> Automatically formats code to be
+                    clean, consistent, and easy to read.
+                  </li>
+                  <li>
+                    <strong>Benefits:</strong> Ensures that your code adheres to
+                    a uniform style, making it more readable and maintainable.
+                  </li>
+                </ul>
+              </li>
+              <li className='text-lg font-semibold'>
+                Prettier
+                <div className='py-5 flex justify-center'>
+                  <img
+                    className=' max-h-32'
+                    src='https://kevinrose.gallerycdn.vsassets.io/extensions/kevinrose/vsc-python-indent/1.18.0/1664843036457/Microsoft.VisualStudio.Services.Icons.Default'
+                    alt='Python Indent Logo'
+                  />
+                </div>
+                <ul className='text-base font-normal pl-5 ps-5 mt-2 space-y-2 list-disc'>
+                  <li>
+                    <strong>Purpose:</strong> Provides better control over
+                    Python indentation, helping you manage tabs and spaces more
+                    effectively.
+                  </li>
+                  <li>
+                    <strong>Benefits:</strong> Prevents common indentation
+                    errors in Python, which are crucial to maintaining code
+                    structure and avoiding syntax issues.
+                  </li>
+                </ul>
+              </li>
+            </ol>
+          </li>
+          <li
+            className='justify-center border-t py-10 dark:border-white
+            border-black'
+            id='conclusion'
+          >
+            <h1 className='font-bold text-3xl text-center pb-5'>Next Steps</h1>
+            <div className='flex flex-col items-center justify-between md:flex-row md:justify-evenly pt-5'>
+              <div className='max-w-xs p-5 bg-white border border-gray-200 rounded-lg shadow dark:bg-black dark:border-purple-500 dark:shadow-[0_0_2px_#fff,inset_0_0_2px_#fff,0_0_5px_#a855f7,0_0_15px_#a855f7,0_0_30px_#a855f7]'>
+                <Link to='#'>
+                  <h5 className='mb-2 text-2xl text-center font-bold tracking-tight text-gray-900 dark:text-white'>
+                    AP CSP
+                  </h5>
+                </Link>
+              </div>
+              <div className='max-w-xs p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-black dark:border-purple-500 dark:shadow-[0_0_2px_#fff,inset_0_0_2px_#fff,0_0_5px_#a855f7,0_0_15px_#a855f7,0_0_30px_#a855f7]'>
+                <Link to='#'>
+                  <h5 className='mb-2 text-2xl text-center font-bold tracking-tight text-gray-900 dark:text-white'>
+                    Cybersecurity
+                  </h5>
+                </Link>
+              </div>
+
+              <div className='max-w-xs p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-black dark:border-purple-500 dark:shadow-[0_0_2px_#fff,inset_0_0_2px_#fff,0_0_5px_#a855f7,0_0_15px_#a855f7,0_0_30px_#a855f7]'>
+                <Link to='#'>
+                  <h5 className='mb-2 text-2xl text-center font-bold tracking-tight text-gray-900 dark:text-white'>
+                    Resources
+                  </h5>
+                </Link>
+              </div>
+            </div>
+          </li>
         </ul>
       </div>
       {/* </div> */}
@@ -628,7 +934,7 @@ export default function GettingStarted() {
             <li>
               <a
                 href='#overview'
-                className='flex items-center p-2 text-black rounded-lg dark:hover:text-purple-500 dark:text-white group'
+                className='flex items-center p-2 text-black rounded-lg dark:hover:text-purple-500 hover:text-purple-500 dark:text-white group'
               >
                 <span className='ms-3'>Overview</span>
               </a>
@@ -636,7 +942,7 @@ export default function GettingStarted() {
             <li>
               <a
                 href='#understanding-os'
-                className='flex items-center p-2 text-black-900 rounded-lg dark:hover:text-purple-500 dark:text-white group'
+                className='flex items-center p-2 text-black rounded-lg dark:hover:text-purple-500 hover:text-purple-500 dark:text-white group'
               >
                 <span className='ms-3'>Understanding OS</span>
               </a>
@@ -644,9 +950,33 @@ export default function GettingStarted() {
             <li>
               <a
                 href='#os-winner'
-                className='flex items-center p-2 text-black-900 rounded-lg dark:hover:text-purple-500 dark:text-white group'
+                className='flex items-center p-2 text-black rounded-lg dark:hover:text-purple-500 hover:text-purple-500 dark:text-white group'
               >
                 <span className='ms-3'>The Clear OS Winner</span>
+              </a>
+            </li>
+            <li>
+              <a
+                href='#what-is-a-vm'
+                className='flex items-center p-2 text-black rounded-lg dark:hover:text-purple-500 hover:text-purple-500 dark:text-white group'
+              >
+                <span className='ms-3'>What is a Virtual Machine?</span>
+              </a>
+            </li>
+            <li>
+              <a
+                href='#what-is-git'
+                className='flex items-center p-2 text-black rounded-lg dark:hover:text-purple-500 hover:text-purple-500 dark:text-white group'
+              >
+                <span className='ms-3'>What is Git (and GitHub)?</span>
+              </a>
+            </li>
+            <li>
+              <a
+                href='#useful-vscode-extensions'
+                className='flex items-center p-2 text-black rounded-lg dark:hover:text-purple-500 hover:text-purple-500 dark:text-white group'
+              >
+                <span className='ms-3'>Useful VSCode Extensions</span>
               </a>
             </li>
           </ul>
