@@ -34,7 +34,7 @@ export default function Header() {
   };
 
   return (
-    <nav className='bg-amber-50 dark:bg-black border-transparent'>
+    <nav className='fixed top-0 left-0 right-0 z-50 bg-amber-50 dark:bg-black border-transparent'>
       <div className='flex flex-wrap items-center justify-between max-w-screen-xl mx-auto p-4'>
         {!currentUser ? (
           <Link to='/'>
