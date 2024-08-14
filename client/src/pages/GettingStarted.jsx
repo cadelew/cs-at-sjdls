@@ -895,7 +895,7 @@ export default function GettingStarted() {
       {/* Drawer Component */}
       <div
         id='drawer-navigation'
-        className={`fixed top-0 left-0 z-40 w-64 bg:w-72  h-screen p-4 overflow-y-auto transition-transform ${
+        className={`fixed top-[70px] left-0 z-40 w-64 bg:w-72  h-screen p-4 overflow-y-auto transition-transform ${
           isDrawerOpen ? 'translate-x-0' : '-translate-x-full dark:shadow-none'
         } border-r-black bg-amber-50 dark:bg-black border-r dark:border-purple-500 dark:shadow-[0_0_2px_#fff,inset_0_0_2px_#fff,0_0_5px_#a855f7,0_0_15px_#a855f7,0_0_30px_#a855f7]`}
         tabIndex='-1'
