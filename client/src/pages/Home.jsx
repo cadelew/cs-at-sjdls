@@ -4,31 +4,30 @@ import { Link } from 'react-router-dom';
 export default function Home() {
   return (
     <div className="min-h-screen bg-amber-50 dark:bg-black">
-      {/* Hero Section */}
-      <div className="pt-56 pb-16 px-6">
+      {/* Hero Section - Full Screen */}
+      <div className="h-screen flex items-center justify-center px-6">
         <div className="max-w-7xl mx-auto text-center">
-          <h1 className="mb-8 relative py-8 flex justify-center items-center text-black dark:text-white text-6xl font-extrabold text-center">
+          <h1 className="mb-12 relative py-8 flex justify-center items-center text-black dark:text-white text-6xl font-extrabold text-center">
             <span className="absolute hidden inset-0 w-full h-full dark:flex justify-center items-center bg-gradient-to-r blur-xl from-purple-500 via-purple-500 to-purple-500 bg-clip-text text-6xl box-content font-extrabold text-transparent select-none">
               Welcome to Computer Science at SJDLS
             </span>
             Welcome to Computer Science at SJDLS
           </h1>
           
-          
           {/* Call-to-Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16">
+          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
             <Link
               to="/sign-up"
               className="px-8 py-4 bg-purple-600 hover:bg-purple-700 text-white font-bold text-lg rounded-xl transition-all duration-300 hover:transform hover:scale-105 shadow-lg"
             >
               Get Started Today
             </Link>
-            <Link
-              to="#courses"
+            <a
+              href="#courses"
               className="px-8 py-4 bg-amber-50 dark:bg-black border border-black dark:border-purple-500 text-black dark:text-white hover:bg-amber-100 dark:hover:bg-gray-800 font-bold text-lg rounded-xl transition-all duration-300 hover:transform hover:scale-105"
             >
               Explore Courses
-            </Link>
+            </a>
           </div>
         </div>
       </div>
