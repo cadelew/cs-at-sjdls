@@ -1,5 +1,25 @@
-# cs-at-sjdls
+# Computer Science at SJDLS
 
-IN PROGRESS...
+A web app built for SJDLS students to learn computer science, prep for AP CSP, and get resources for CyberPatriot — all in one place.
 
-I aim to create a website that can be used as a resource for students interested in computer science at SJDLS. This will include resourcse for passing the AP computer science exam such  as study guides, project checklists, and documentation links. I also plan to include high school programs such as Google's CSSI and Jane Street's AMP.
+---
+
+## What It Does 
+
+- **Course Guides** for PLTW, AP CSP, and CyberPatriot 
+- **Interactive Checklists** (AP Create Task + CyberPatriot Windows/Linux security tasks) 
+- **Learning Resources** (setup guides, practice problems, scholarships, internships, etc.) 
+- **User Accounts** with Google Sign-In or Email+Password 
+
+---
+
+## Tech Stack 
+
+| Area | Tools |
+|------|------|
+| Frontend | React + Vite + Tailwind + Redux |
+| Backend | Node + Express + MongoDB |
+| Auth / Storage | Firebase |
+| Hosting | Vercel (frontend) + Render (backend) + MongoDB Atlas |
+
+ 
