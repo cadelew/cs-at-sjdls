@@ -57,7 +57,7 @@ export default function Profile() {
     );
   };
   const handleChange = (e) => {
-    setFormData({ ...FormData, [e.target.id]: e.target.value });
+    setFormData({ ...formData, [e.target.id]: e.target.value });
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -85,7 +85,7 @@ export default function Profile() {
   const handleDeleteAccount = async () => {
     try {
       dispatch(deleteUserStart());
-      const res = await fetch(`api/user/delete/${currentUser._id}`, {
+      const res = await fetch(`/api/user/delete/${currentUser._id}`, {
         method: 'DELETE',
       });
       const data = await res.json();
@@ -101,7 +101,7 @@ export default function Profile() {
 
   const handleSignOut = async () => {
     try {
-      await fetch('api/auth/signout');
+      await fetch('/api/auth/signout');
       dispatch(signOut());
     } catch (error) {
       console.log(error);
@@ -109,98 +109,157 @@ export default function Profile() {
   };
 
   return (
-    <div className='p-3 max-w-lg mx-auto'>
-      <h1 className='text-3xl font-semibold text-center my-7'>Profile</h1>
-      <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
-        <input
-          type='file'
-          ref={fileRef}
-          hidden
-          accept='image/*'
-          onChange={(e) => setImage(e.target.files[0])}
-        />
-        <a
-          onClick={() => fileRef.current.click()}
-          className='relative inline-flex self-center group'
-        >
-          <img
-            src={currentUser.profilePicture}
-            alt='profile picture'
-            className='h-24 w-24 self-center rounded-full object-cover mt-2'
-          />
-          <img
-            src="data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg' aria-labelledby='title' aria-describedby='desc' role='img' xmlns:xlink='http://www.w3.org/1999/xlink'%3E%3Ctitle%3EEdit Button%3C/title%3E%3Cdesc%3EA line styled icon from Orion Icon Library.%3C/desc%3E%3Cpath stroke-width='2' stroke-miterlimit='10' stroke='%23202020' fill='none' d='M44.889 26.138l1.882-1.883c1.941-1.94 1.439-4.584-.5-6.524s-4.584-2.442-6.525-.5l-1.882 1.883' data-name='layer2' stroke-linejoin='round' stroke-linecap='round'%3E%3C/path%3E%3Cpath d='M41.814 29.212l3.075-3.074-7.027-7.027-3.074 3.074M18.164 38.809l7.026 7.026' stroke-width='2' stroke-miterlimit='10' stroke='%23202020' fill='none' data-name='layer2' stroke-linejoin='round' stroke-linecap='round'%3E%3C/path%3E%3Ccircle stroke-width='2' stroke-miterlimit='10' stroke='%23202020' fill='none' r='30' cy='32' cx='32' data-name='layer1' stroke-linejoin='round' stroke-linecap='round'%3E%3C/circle%3E%3Cpath d='M25.19 45.835l16.624-16.623-7.026-7.027-16.624 16.624L16 47.999l9.19-2.164z' stroke-width='2' stroke-miterlimit='10' stroke='%23202020' fill='none' data-name='layer2' stroke-linejoin='round' stroke-linecap='round'%3E%3C/path%3E%3C/svg%3E"
-            alt='Edit Button'
-            className='h-8 w-8 absolute bottom-0 right-0 bg-slate-100 rounded-full object-cover border-none group-hover:bg-slate-500'
-          />
-        </a>
-
-        <p className='text-sm self-center text-center'>
-          {imageError ? (
-            <span className='text-red-700'>
-              Error Uploading Image (file size must be less than 2 MB)
+    <div className="min-h-screen bg-amber-50 dark:bg-black pt-24 p-6">
+      <div className="max-w-2xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <h1 className="mb-6 relative py-6 flex justify-center items-center text-black dark:text-white text-5xl font-extrabold text-center">
+            <span className="absolute hidden inset-0 w-full h-full dark:flex justify-center items-center bg-gradient-to-r blur-xl from-purple-500 via-purple-500 to-purple-500 bg-clip-text text-5xl box-content font-extrabold text-transparent select-none">
+              Profile
             </span>
-          ) : imagePercent > 0 && imagePercent < 100 ? (
-            <span className='text-slate-700'>
-              {`Uploading: ${imagePercent}%`}
-            </span>
-          ) : imagePercent === 100 ? (
-            <span className='text-green-700 '>
-              Image Uploaded Successfully
-              <br />
-              Press the Update Button Below to Save Changes
-            </span>
-          ) : (
-            ''
-          )}
-        </p>
+            Profile
+          </h1>
+          <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+            Manage your account settings and preferences
+          </p>
+        </div>
 
-        <input
-          defaultValue={currentUser.username}
-          type='text'
-          id='username'
-          placeholder='Username'
-          className='bg-slate-100 rounded-lg p-3'
-          onChange={handleChange}
-        ></input>
+        {/* Profile Form */}
+        <div className="bg-amber-50 dark:bg-black border border-black dark:border-purple-500 rounded-xl p-8 shadow-lg">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Profile Picture */}
+            <div className="flex flex-col items-center space-y-4">
+              <input
+                type="file"
+                ref={fileRef}
+                hidden
+                accept="image/*"
+                onChange={(e) => setImage(e.target.files[0])}
+              />
+              <div
+                onClick={() => fileRef.current.click()}
+                className="relative inline-flex self-center group cursor-pointer"
+              >
+                <img
+                  src={currentUser.profilePicture}
+                  alt="profile picture"
+                  className="h-32 w-32 self-center rounded-full object-cover border-4 border-black dark:border-purple-500 shadow-lg hover:shadow-xl transition-all duration-300"
+                />
+                <div className="absolute bottom-0 right-0 bg-purple-600 hover:bg-purple-700 text-white rounded-full p-2 border-2 border-white dark:border-purple-500 transition-all duration-300">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  </svg>
+                </div>
+              </div>
 
-        <input
-          defaultValue={currentUser.email}
-          type='email'
-          id='email'
-          placeholder='Email'
-          className='bg-slate-100 rounded-lg p-3'
-          onChange={handleChange}
-        ></input>
+              {/* Upload Status */}
+              <div className="text-center">
+                {imageError ? (
+                  <span className="text-red-600 dark:text-red-400 font-semibold">
+                    Error Uploading Image (file size must be less than 2 MB)
+                  </span>
+                ) : imagePercent > 0 && imagePercent < 100 ? (
+                  <span className="text-purple-600 dark:text-purple-400 font-semibold">
+                    Uploading: {imagePercent}%
+                  </span>
+                ) : imagePercent === 100 ? (
+                  <span className="text-green-600 dark:text-green-400 font-semibold">
+                    Image Uploaded Successfully! Press Update to save changes.
+                  </span>
+                ) : (
+                  <span className="text-gray-600 dark:text-gray-400">
+                    Click the edit icon to change your profile picture
+                  </span>
+                )}
+              </div>
+            </div>
 
-        <input
-          type='password'
-          id='password'
-          placeholder='Password'
-          className='bg-slate-100 rounded-lg p-3'
-          onChange={handleChange}
-        ></input>
+            {/* Form Fields */}
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="username" className="block text-sm font-semibold text-black dark:text-white mb-2">
+                  Username
+                </label>
+                <input
+                  defaultValue={currentUser.username}
+                  type="text"
+                  id="username"
+                  placeholder="Username"
+                  className="w-full bg-amber-100 dark:bg-gray-800 border border-black dark:border-purple-500 rounded-xl p-4 text-black dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 transition-all duration-300"
+                  onChange={handleChange}
+                />
+              </div>
 
-        <button className='bg-slate-700 text-white p-3 rounded-lg uppercase hover:opacity-95 disabled:opacity-85'>
-          {loading ? 'Loading...' : 'Update'}
-        </button>
-      </form>
-      <div className='flex justify-between mt-5'>
-        <span
-          onClick={handleDeleteAccount}
-          className='text-red-700 cursor-pointer'
-        >
-          Delete Account
-        </span>
-        <span onClick={handleSignOut} className='text-red-700 cursor-pointer'>
-          Sign Out
-        </span>
+              <div>
+                <label htmlFor="email" className="block text-sm font-semibold text-black dark:text-white mb-2">
+                  Email
+                </label>
+                <input
+                  defaultValue={currentUser.email}
+                  type="email"
+                  id="email"
+                  placeholder="Email"
+                  className="w-full bg-amber-100 dark:bg-gray-800 border border-black dark:border-purple-500 rounded-xl p-4 text-black dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 transition-all duration-300"
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div>
+                <label htmlFor="password" className="block text-sm font-semibold text-black dark:text-white mb-2">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  id="password"
+                  placeholder="New Password (leave blank to keep current)"
+                  className="w-full bg-amber-100 dark:bg-gray-800 border border-black dark:border-purple-500 rounded-xl p-4 text-black dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 transition-all duration-300"
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+
+            {/* Update Button */}
+            <button
+              disabled={loading}
+              className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 hover:transform hover:scale-105 shadow-lg disabled:transform-none disabled:shadow-none"
+            >
+              {loading ? 'Updating...' : 'Update Profile'}
+            </button>
+          </form>
+
+          {/* Action Buttons */}
+          <div className="mt-8 pt-6 border-t border-gray-300 dark:border-gray-600">
+            <div className="flex flex-col sm:flex-row gap-4 justify-between">
+              <button
+                onClick={handleDeleteAccount}
+                className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl transition-all duration-300 hover:transform hover:scale-105 shadow-lg"
+              >
+                Delete Account
+              </button>
+              <button
+                onClick={handleSignOut}
+                className="px-6 py-3 bg-amber-50 dark:bg-black border border-black dark:border-purple-500 text-black dark:text-white hover:bg-amber-100 dark:hover:bg-gray-800 font-semibold rounded-xl transition-all duration-300 hover:transform hover:scale-105"
+              >
+                Sign Out
+              </button>
+            </div>
+          </div>
+
+          {/* Status Messages */}
+          <div className="mt-6 text-center">
+            {error && (
+              <p className="text-red-600 dark:text-red-400 font-semibold">
+                {error.message || 'Something went wrong!'}
+              </p>
+            )}
+            {updateSuccess && (
+              <p className="text-green-600 dark:text-green-400 font-semibold">
+                Profile updated successfully!
+              </p>
+            )}
+          </div>
+        </div>
       </div>
-      <p className='text-red-700 mt-5'> {error && 'Something went wrong!'} </p>
-      <p className='text-green-700 mt-5 text-center'>
-        {' '}
-        {updateSuccess && 'User is updated successfully!'}{' '}
-      </p>
     </div>
   );
 }

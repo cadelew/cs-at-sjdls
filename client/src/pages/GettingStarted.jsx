@@ -1,985 +1,690 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import githubLogo from '../images/github-logo.png';
 
 export default function GettingStarted() {
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [completedSteps, setCompletedSteps] = useState([]);
+  const [selectedOS, setSelectedOS] = useState('');
+  const [showDetails, setShowDetails] = useState(false);
 
-  const toggleDrawer = () => {
-    setIsDrawerOpen(!isDrawerOpen);
+  const steps = [
+    { id: 'welcome', title: 'Welcome', icon: '' },
+    { id: 'choose-os', title: 'Choose OS', icon: '' },
+    { id: 'dev-environment', title: 'VS Code Setup', icon: '' },
+    { id: 'git-github', title: 'Git & GitHub', icon: '' },
+    { id: 'first-project', title: 'First Project', icon: '' },
+    { id: 'next-steps', title: 'Next Steps', icon: '' }
+  ];
+
+  const operatingSystems = [
+    {
+      id: 'windows',
+      name: 'Windows',
+      icon: '',
+      description: 'Most common for beginners',
+      pros: ['Familiar interface', 'Great for beginners', 'Wide software support']
+    },
+    {
+      id: 'macos',
+      name: 'macOS',
+      icon: '',
+      description: 'Popular among developers',
+      pros: ['Unix-based', 'Great development tools', 'Smooth experience']
+    },
+    {
+      id: 'linux',
+      name: 'Linux',
+      icon: '',
+      description: 'Powerful and flexible',
+      pros: ['Free and open source', 'Highly customizable', 'Great for servers']
+    }
+  ];
+
+  const vscodeExtensions = [
+    {
+      name: 'Python',
+      description: 'Official Python extension with IntelliSense, debugging, and more',
+      features: ['Syntax highlighting', 'Code completion', 'Debugging', 'Linting']
+    },
+    {
+      name: 'Live Server',
+      description: 'Launch a development local Server with live reload feature',
+      features: ['Live reload', 'Local server', 'Quick preview', 'Auto-refresh']
+    },
+    {
+      name: 'Prettier',
+      description: 'Code formatter that enforces consistent code style',
+      features: ['Auto-formatting', 'Consistent style', 'Multiple languages', 'Configurable']
+    },
+    {
+      name: 'GitLens',
+      description: 'Supercharge Git capabilities with blame annotations and more',
+      features: ['Git blame', 'File history', 'Commit details', 'Repository insights']
+    },
+    {
+      name: 'Thunder Client',
+      description: 'Lightweight REST API Client for VS Code',
+      features: ['API testing', 'Request collections', 'Environment variables', 'GraphQL support']
+    },
+    {
+      name: 'Auto Rename Tag',
+      description: 'Automatically rename paired HTML/XML tags',
+      features: ['Auto-rename', 'HTML/XML support', 'Real-time updates', 'Paired tags']
+    },
+    {
+      name: 'Bracket Pair Colorizer',
+      description: 'Colorize matching bracket pairs for better code readability',
+      features: ['Color coding', 'Nested brackets', 'Customizable colors', 'Multiple languages']
+    },
+    {
+      name: 'Path Intellisense',
+      description: 'Autocompletes filenames in import statements',
+      features: ['File path completion', 'Import suggestions', 'Quick navigation', 'Smart matching']
+    },
+    {
+      name: 'Material Icon Theme',
+      description: 'Beautiful material design icons for your files and folders',
+      features: ['File type icons', 'Folder icons', 'Customizable', 'Material design']
+    },
+    {
+      name: 'Error Lens',
+      description: 'Show errors and warnings inline in your code',
+      features: ['Inline errors', 'Real-time feedback', 'Multiple languages', 'Customizable display']
+    }
+  ];
+
+  const handleNext = () => {
+    if (currentStep < steps.length - 1) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const handleStepClick = (stepIndex) => {
+    setCurrentStep(stepIndex);
+  };
+
+  const handleStepComplete = (stepId) => {
+    if (!completedSteps.includes(stepId)) {
+      setCompletedSteps([...completedSteps, stepId]);
+    }
+  };
+
+  const renderStepContent = () => {
+    switch (currentStep) {
+      case 0:
+        return (
+          <div className="text-center space-y-8">
+            <div className="text-7xl mb-6"></div>
+            <h2 className="text-4xl font-bold text-black dark:text-white mb-6">
+              Welcome to Computer Science at SJDLS!
+            </h2>
+            <p className="text-xl text-gray-700 dark:text-gray-300 mb-8 max-w-3xl mx-auto leading-relaxed">
+              This guide will help you set up everything you need to start your computer science journey.
+              We'll walk through each step together!
+            </p>
+            <div className="bg-amber-100 dark:bg-gray-800 border border-black dark:border-purple-500 rounded-xl p-8 max-w-2xl mx-auto">
+              <h3 className="text-2xl font-semibold text-black dark:text-white mb-6">
+                What You'll Learn:
+              </h3>
+              <ul className="text-left space-y-3 text-gray-700 dark:text-gray-300 text-lg">
+                <li className="flex items-start space-x-3">
+                  <span className="text-purple-600 dark:text-purple-400 text-xl">•</span>
+                  <span>How to choose and set up your development environment</span>
+                </li>
+                <li className="flex items-start space-x-3">
+                  <span className="text-purple-600 dark:text-purple-400 text-xl">•</span>
+                  <span>Essential tools for programming</span>
+                </li>
+                <li className="flex items-start space-x-3">
+                  <span className="text-purple-600 dark:text-purple-400 text-xl">•</span>
+                  <span>Version control with Git and GitHub</span>
+                </li>
+                <li className="flex items-start space-x-3">
+                  <span className="text-purple-600 dark:text-purple-400 text-xl">•</span>
+                  <span>How to create and manage your first project</span>
+                </li>
+              </ul>
+            </div>
+            <button
+              onClick={() => {
+                handleStepComplete('welcome');
+                handleNext();
+              }}
+              className="px-10 py-4 bg-purple-600 hover:bg-purple-700 text-white font-bold text-lg rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg"
+            >
+              Let's Get Started!
+            </button>
+          </div>
+        );
+
+      case 1:
+        return (
+          <div className="space-y-8">
+            <div className="text-center">
+              <h2 className="text-4xl font-bold text-black dark:text-white mb-6">
+                Choose Your Operating System
+              </h2>
+              <p className="text-xl text-gray-700 dark:text-gray-300 max-w-2xl mx-auto">
+                Don't worry - you can always change later! Pick what you're most comfortable with.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-8">
+              {operatingSystems.map((os) => (
+                <div
+                  key={os.id}
+                  className={`p-8 rounded-xl border-2 cursor-pointer transition-all duration-300 ${
+                    selectedOS === os.id
+                      ? 'border-purple-500 bg-purple-50 dark:bg-purple-900 transform scale-105 shadow-lg'
+                      : 'border-black dark:border-purple-500 bg-amber-50 dark:bg-black hover:bg-amber-100 dark:hover:bg-gray-800 hover:transform hover:scale-105'
+                  }`}
+                  onClick={() => setSelectedOS(os.id)}
+                >
+                  <div className="text-5xl mb-4 text-center">{os.icon}</div>
+                  <h3 className="text-2xl font-semibold text-black dark:text-white mb-3 text-center">
+                    {os.name}
+                  </h3>
+                  <p className="text-gray-700 dark:text-gray-300 mb-4 text-center">
+                    {os.description}
+                  </p>
+                  <div className="space-y-2">
+                    {os.pros.map((pro, index) => (
+                      <div key={index} className="text-sm text-gray-600 dark:text-gray-400 flex items-center space-x-2">
+                        <span className="text-green-600 dark:text-green-400">✓</span>
+                        <span>{pro}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {selectedOS && (
+              <div className="bg-green-100 dark:bg-green-900 border border-green-500 rounded-xl p-8 text-center">
+                <h3 className="text-2xl font-semibold text-green-800 dark:text-green-200 mb-4">
+                  ✅ Great Choice!
+                </h3>
+                <p className="text-lg text-green-700 dark:text-green-300">
+                  You've selected {operatingSystems.find(os => os.id === selectedOS)?.name}.
+                  Now let's set up VS Code, which works great on all operating systems!
+                </p>
+              </div>
+            )}
+
+            <div className="flex justify-between pt-6">
+              <button
+                onClick={handlePrevious}
+                className="px-8 py-3 bg-amber-50 dark:bg-black border border-black dark:border-purple-500 text-black dark:text-white hover:bg-amber-100 dark:hover:bg-gray-800 font-semibold rounded-xl transition-all duration-300 hover:transform hover:scale-105"
+              >
+                ← Previous
+              </button>
+              <button
+                onClick={() => {
+                  if (selectedOS) {
+                    handleStepComplete('choose-os');
+                    handleNext();
+                  }
+                }}
+                disabled={!selectedOS}
+                className={`px-8 py-3 font-semibold rounded-xl transition-all duration-300 ${
+                  selectedOS
+                    ? 'bg-purple-600 hover:bg-purple-700 text-white hover:transform hover:scale-105 shadow-lg'
+                    : 'bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+                }`}
+              >
+                Next →
+              </button>
+            </div>
+          </div>
+        );
+
+      case 2:
+        return (
+          <div className="space-y-8">
+            <div className="text-center">
+              <h2 className="text-4xl font-bold text-black dark:text-white mb-6">
+                Set Up VS Code
+              </h2>
+              <p className="text-xl text-gray-700 dark:text-gray-300 max-w-2xl mx-auto">
+                Visual Studio Code is the most popular code editor. Let's get it set up with the right extensions!
+              </p>
+            </div>
+
+            <div className="bg-blue-100 dark:bg-blue-900 border border-blue-500 rounded-xl p-8 mb-8">
+              <h3 className="text-2xl font-semibold text-blue-800 dark:text-blue-200 mb-4">
+                📥 Download VS Code
+              </h3>
+              <p className="text-lg text-blue-700 dark:text-blue-300 mb-4">
+                First, download and install VS Code from the official website:
+              </p>
+              <a
+                href="https://code.visualstudio.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg"
+              >
+                Download VS Code
+              </a>
+            </div>
+
+            <div className="bg-amber-100 dark:bg-gray-800 border border-black dark:border-purple-500 rounded-xl p-8">
+              <h3 className="text-2xl font-semibold text-black dark:text-white mb-6">
+                🔌 Essential Extensions
+              </h3>
+              <p className="text-lg text-gray-700 dark:text-gray-300 mb-6">
+                Install these extensions to supercharge your development experience:
+              </p>
+              <div className="grid md:grid-cols-2 gap-6">
+                {vscodeExtensions.map((extension, index) => (
+                  <div key={index} className="bg-amber-50 dark:bg-black border border-black dark:border-purple-500 rounded-xl p-6">
+                    <h4 className="text-lg font-semibold text-black dark:text-white mb-2">
+                      {extension.name}
+                    </h4>
+                    <p className="text-gray-700 dark:text-gray-300 mb-3 text-sm">
+                      {extension.description}
+                    </p>
+                    <div className="space-y-1">
+                      {extension.features.map((feature, featureIndex) => (
+                        <div key={featureIndex} className="text-xs text-gray-600 dark:text-gray-400 flex items-center space-x-2">
+                          <span className="text-purple-600 dark:text-purple-400">•</span>
+                          <span>{feature}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex justify-between pt-6">
+              <button
+                onClick={handlePrevious}
+                className="px-8 py-3 bg-amber-50 dark:bg-black border border-black dark:border-purple-500 text-black dark:text-white hover:bg-amber-100 dark:hover:bg-gray-800 font-semibold rounded-xl transition-all duration-300 hover:transform hover:scale-105"
+              >
+                ← Previous
+              </button>
+              <button
+                onClick={() => {
+                  handleStepComplete('dev-environment');
+                  handleNext();
+                }}
+                className="px-8 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-xl transition-all duration-300 hover:transform hover:scale-105 shadow-lg"
+              >
+                Next →
+              </button>
+            </div>
+          </div>
+        );
+
+      case 3:
+        return (
+          <div className="space-y-8">
+            <div className="text-center">
+              <h2 className="text-4xl font-bold text-black dark:text-white mb-6">
+                Git & GitHub Setup
+              </h2>
+              <p className="text-xl text-gray-700 dark:text-gray-300 max-w-2xl mx-auto">
+                Learn version control - essential for any developer!
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-8">
+              <div className="bg-amber-100 dark:bg-gray-800 border border-black dark:border-purple-500 rounded-xl p-8">
+                <h3 className="text-2xl font-semibold text-black dark:text-white mb-4">
+                  What is Git?
+                </h3>
+                <p className="text-gray-700 dark:text-gray-300 mb-4">
+                  Git is a version control system that tracks changes in your code. It's like a save system for your projects!
+                </p>
+                <ul className="space-y-2 text-gray-700 dark:text-gray-300">
+                  <li className="flex items-start space-x-3">
+                    <span className="text-green-600 dark:text-green-400 text-xl">✓</span>
+                    <span>Track changes in your code</span>
+                  </li>
+                  <li className="flex items-start space-x-3">
+                    <span className="text-green-600 dark:text-green-400 text-xl">✓</span>
+                    <span>Collaborate with others</span>
+                  </li>
+                  <li className="flex items-start space-x-3">
+                    <span className="text-green-600 dark:text-green-400 text-xl">✓</span>
+                    <span>Backup your work</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="bg-amber-100 dark:bg-gray-800 border border-black dark:border-purple-500 rounded-xl p-8">
+                <h3 className="text-2xl font-semibold text-black dark:text-white mb-4">
+                  What is GitHub?
+                </h3>
+                <p className="text-gray-700 dark:text-gray-300 mb-4">
+                  GitHub is a platform that hosts your Git repositories online. It's like Google Drive for code!
+                </p>
+                <ul className="space-y-2 text-gray-700 dark:text-gray-300">
+                  <li className="flex items-start space-x-3">
+                    <span className="text-green-600 dark:text-green-400 text-xl">✓</span>
+                    <span>Store your code online</span>
+                  </li>
+                  <li className="flex items-start space-x-3">
+                    <span className="text-green-600 dark:text-green-400 text-xl">✓</span>
+                    <span>Share projects with others</span>
+                  </li>
+                  <li className="flex items-start space-x-3">
+                    <span className="text-green-600 dark:text-green-400 text-xl">✓</span>
+                    <span>Build a portfolio</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="bg-green-100 dark:bg-green-900 border border-green-500 rounded-xl p-8">
+              <h3 className="text-2xl font-semibold text-green-800 dark:text-green-200 mb-4">
+                Quick Setup Steps
+              </h3>
+              <ol className="space-y-3 text-green-700 dark:text-green-300">
+                <li className="flex items-start space-x-3">
+                  <span className="bg-green-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-semibold">1</span>
+                  <span>Create a GitHub account at github.com</span>
+                </li>
+                <li className="flex items-start space-x-3">
+                  <span className="bg-green-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-semibold">2</span>
+                  <span>Download Git from git-scm.com</span>
+                </li>
+                <li className="flex items-start space-x-3">
+                  <span className="bg-green-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-semibold">3</span>
+                  <span>Configure Git with your name and email</span>
+                </li>
+                <li className="flex items-start space-x-3">
+                  <span className="bg-green-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-semibold">4</span>
+                  <span>Create your first repository on GitHub</span>
+                </li>
+              </ol>
+            </div>
+
+            <div className="flex justify-between pt-6">
+              <button
+                onClick={handlePrevious}
+                className="px-8 py-3 bg-amber-50 dark:bg-black border border-black dark:border-purple-500 text-black dark:text-white hover:bg-amber-100 dark:hover:bg-gray-800 font-semibold rounded-xl transition-all duration-300 hover:transform hover:scale-105"
+              >
+                ← Previous
+              </button>
+              <button
+                onClick={() => {
+                  handleStepComplete('git-github');
+                  handleNext();
+                }}
+                className="px-8 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-xl transition-all duration-300 hover:transform hover:scale-105 shadow-lg"
+              >
+                Next →
+              </button>
+            </div>
+          </div>
+        );
+
+      case 4:
+        return (
+          <div className="space-y-8">
+            <div className="text-center">
+              <h2 className="text-4xl font-bold text-black dark:text-white mb-6">
+                Create Your First Project
+              </h2>
+              <p className="text-xl text-gray-700 dark:text-gray-300 max-w-2xl mx-auto">
+                Time to put everything together and create your first coding project!
+              </p>
+            </div>
+
+            <div className="bg-amber-100 dark:bg-gray-800 border border-black dark:border-purple-500 rounded-xl p-8">
+              <h3 className="text-2xl font-semibold text-black dark:text-white mb-6">
+                Project Ideas for Beginners
+              </h3>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="bg-amber-50 dark:bg-black border border-black dark:border-purple-500 rounded-xl p-6">
+                  <h4 className="text-lg font-semibold text-black dark:text-white mb-3">
+                    Web Development
+                  </h4>
+                  <ul className="space-y-2 text-gray-700 dark:text-gray-300 text-sm">
+                    <li>• Personal portfolio website</li>
+                    <li>• Simple calculator</li>
+                    <li>• To-do list app</li>
+                    <li>• Weather app</li>
+                  </ul>
+                </div>
+                <div className="bg-amber-50 dark:bg-black border border-black dark:border-purple-500 rounded-xl p-6">
+                  <h4 className="text-lg font-semibold text-black dark:text-white mb-3">
+                    🐍 Python Projects
+                  </h4>
+                  <ul className="space-y-2 text-gray-700 dark:text-gray-300 text-sm">
+                    <li>• Number guessing game</li>
+                    <li>• Password generator</li>
+                    <li>• Simple calculator</li>
+                    <li>• Text-based adventure game</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-blue-100 dark:bg-blue-900 border border-blue-500 rounded-xl p-8">
+              <h3 className="text-2xl font-semibold text-blue-800 dark:text-blue-200 mb-4">
+                📝 Project Checklist
+              </h3>
+              <ol className="space-y-3 text-blue-700 dark:text-blue-300">
+                <li className="flex items-start space-x-3">
+                  <span className="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-semibold">1</span>
+                  <span>Choose a project idea that interests you</span>
+                </li>
+                <li className="flex items-start space-x-3">
+                  <span className="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-semibold">2</span>
+                  <span>Create a new folder for your project</span>
+                </li>
+                <li className="flex items-start space-x-3">
+                  <span className="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-semibold">3</span>
+                  <span>Open the folder in VS Code</span>
+                </li>
+                <li className="flex items-start space-x-3">
+                  <span className="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-semibold">4</span>
+                  <span>Create your first file and start coding!</span>
+                </li>
+                <li className="flex items-start space-x-3">
+                  <span className="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-semibold">5</span>
+                  <span>Use Git to save your progress</span>
+                </li>
+              </ol>
+            </div>
+
+            <div className="flex justify-between pt-6">
+              <button
+                onClick={handlePrevious}
+                className="px-8 py-3 bg-amber-50 dark:bg-black border border-black dark:border-purple-500 text-black dark:text-white hover:bg-amber-100 dark:hover:bg-gray-800 font-semibold rounded-xl transition-all duration-300 hover:transform hover:scale-105"
+              >
+                ← Previous
+              </button>
+              <button
+                onClick={() => {
+                  handleStepComplete('first-project');
+                  handleNext();
+                }}
+                className="px-8 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-xl transition-all duration-300 hover:transform hover:scale-105 shadow-lg"
+              >
+                Next →
+              </button>
+            </div>
+          </div>
+        );
+
+      case 5:
+        return (
+          <div className="space-y-8">
+            <div className="text-center">
+              <h2 className="text-4xl font-bold text-black dark:text-white mb-6">
+                Congratulations!
+              </h2>
+              <p className="text-xl text-gray-700 dark:text-gray-300 max-w-2xl mx-auto">
+                You've completed the setup guide! You're now ready to start your computer science journey.
+              </p>
+            </div>
+
+            <div className="bg-green-100 dark:bg-green-900 border border-green-500 rounded-xl p-8 mb-8">
+              <h3 className="text-2xl font-semibold text-green-800 dark:text-green-200 mb-4">
+                ✅ What You've Accomplished
+              </h3>
+              <ul className="space-y-3 text-green-700 dark:text-green-300">
+                <li className="flex items-start space-x-3">
+                  <span className="text-green-600 dark:text-green-400 text-xl">✓</span>
+                  <span>Chosen your operating system</span>
+                </li>
+                <li className="flex items-start space-x-3">
+                  <span className="text-green-600 dark:text-green-400 text-xl">✓</span>
+                  <span>Set up VS Code with essential extensions</span>
+                </li>
+                <li className="flex items-start space-x-3">
+                  <span className="text-green-600 dark:text-green-400 text-xl">✓</span>
+                  <span>Learned about Git and GitHub</span>
+                </li>
+                <li className="flex items-start space-x-3">
+                  <span className="text-green-600 dark:text-green-400 text-xl">✓</span>
+                  <span>Got ideas for your first project</span>
+                </li>
+              </ul>
+            </div>
+
+            <div className="bg-amber-100 dark:bg-gray-800 border border-black dark:border-purple-500 rounded-xl p-8">
+              <h3 className="text-2xl font-semibold text-black dark:text-white mb-6">
+                Next Steps
+              </h3>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="bg-amber-50 dark:bg-black border border-black dark:border-purple-500 rounded-xl p-6">
+                  <h4 className="text-lg font-semibold text-black dark:text-white mb-3">
+                    Continue Learning
+                  </h4>
+                  <ul className="space-y-2 text-gray-700 dark:text-gray-300 text-sm">
+                    <li>• Practice coding daily</li>
+                    <li>• Join coding communities</li>
+                    <li>• Build more projects</li>
+                    <li>• Learn new programming languages</li>
+                  </ul>
+                </div>
+                <div className="bg-amber-50 dark:bg-black border border-black dark:border-purple-500 rounded-xl p-6">
+                  <h4 className="text-lg font-semibold text-black dark:text-white mb-3">
+                    Set Goals
+                  </h4>
+                  <ul className="space-y-2 text-gray-700 dark:text-gray-300 text-sm">
+                    <li>• Complete your first project</li>
+                    <li>• Learn a new technology</li>
+                    <li>• Contribute to open source</li>
+                    <li>• Build your portfolio</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div className="text-center space-y-6">
+              <h3 className="text-2xl font-semibold text-black dark:text-white">
+                Ready to Start Coding?
+              </h3>
+              <div className="flex flex-col md:flex-row gap-6 justify-center">
+                <button
+                  onClick={() => {
+                    handleStepComplete('next-steps');
+                    setCurrentStep(0);
+                    setCompletedSteps([]);
+                    setSelectedOS('');
+                  }}
+                  className="px-8 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg"
+                >
+                  🔄 Start Over
+                </button>
+                <button
+                  onClick={handlePrevious}
+                  className="px-8 py-3 bg-amber-50 dark:bg-black border border-black dark:border-purple-500 text-black dark:text-white hover:bg-amber-100 dark:hover:bg-gray-800 font-semibold rounded-xl transition-all duration-300 hover:transform hover:scale-105"
+                >
+                  ← Previous
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+
+      default:
+        return null;
+    }
   };
 
   return (
-    <div className='flex justify-center min-h-screen min-w-screen dark:bg-black bg-amber-50'>
-      {/* <div className='flex justify-center min-h-screen'> */}
-      <div
-        className='pt-20 md:w-1/2 w-full text-black dark:text-white'
-        id='overview'
-      >
-        <h1 className='mb-7 relative py-4 flex justify-center items-center text-black dark:bg-gradient-to-r dark:from-purple-800 dark:via-purple-500 dark:to-purple-800 bg-clip-text text-6xl font-extrabold dark:text-transparent text-center'>
-          <span className='absolute hidden inset-0 w-full h-full dark:flex justify-center items-center bg-gradient-to-r blur-xl from-purple-500 via-purple-500 to-purple-500 bg-clip-text text-6xl box-content font-extrabold text-transparent select-none'>
+    <div className="min-h-screen bg-amber-50 dark:bg-black pt-24 p-6">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <h1 className="mb-6 relative py-6 flex justify-center items-center text-black dark:text-white text-5xl font-extrabold text-center">
+            <span className="absolute hidden inset-0 w-full h-full dark:flex justify-center items-center bg-gradient-to-r blur-xl from-purple-500 via-purple-500 to-purple-500 bg-clip-text text-5xl box-content font-extrabold text-transparent select-none">
+              Getting Started
+            </span>
             Getting Started
-          </span>
-          Getting Started
-        </h1>
-        <div>
-          <h1 className='pb-5 font-bold flex-start text-lg'>Overview</h1>
-          <h3 className='flex-start flex-wrap'>
-            This is where it all begins! A hands-on introduction to all of the
-            essential tools you'll need to build real, working websites. You'll
-            learn what web developers actually do – the foundations you'll need
-            for later courses.
-          </h3>
+          </h1>
+          <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+            Set up your development environment and start your computer science journey
+          </p>
         </div>
-        <ul className='flex flex-col justify-center my-10 border-y border-b-0 pt-5  pb-10 dark:border-white border-black'>
-          <li
-            className='justify-center border-t-inherit pt-5 pb-10 dark:border-white border-black'
-            id='understanding-os'
-          >
-            <h1 className='font-bold text-3xl text-center pb-5'>
-              Understanding Operating Systems (OS)
-            </h1>
-            <h3>
-              Operating systems (OS) are the backbone of any computer, managing
-              everything from running applications to handling files and
-              security. For software engineers and computer scientists, choosing
-              the right OS can significantly impact productivity, performance,
-              and user experience. In this blog, we’ll explore the pros and cons
-              of three popular operating systems—Windows, macOS, and
-              Linux—focusing on performance, user interface (UI), and their
-              suitability for software development.
-            </h3>
 
-            {/* Windows Section */}
-            <h2 className='font-bold text-xl my-5'>Windows</h2>
-            <div className='py-5 flex justify-center'>
-              <img
-                className=' max-h-32'
-                src='https://static.vecteezy.com/system/resources/previews/016/460/828/original/windows-os-logo-top-operating-system-signs-free-png.png'
-                alt='Windows Logo'
-              />
-            </div>
-            <h3>
-              Windows is the most commonly used operating system, especially in
-              businesses, schools, and homes. It's known for its compatibility
-              with a wide range of software and hardware, making it a go-to
-              choice for many professionals. But how does it stack up for
-              software engineers and computer scientists?
-            </h3>
-            <div className='md:ml-3'>
-              <h2 className='mt-5 my-2 font-semibold text-lg text-black dark:text-white'>
-                Pros:
-              </h2>
-              <ul className='pl-5 space-y-2 text-black list-disc list-outside dark:text-white'>
-                <li>
-                  <strong className='font-semibold'>Performance:</strong>{' '}
-                  Windows supports a wide range of hardware, from budget to
-                  high-end systems, and is optimized for performance across
-                  various tasks, including gaming and software development.
-                </li>
-                <li>
-                  <strong className='font-semibold'>
-                    User-Friendly Interface:
-                  </strong>{' '}
-                  The user interface is intuitive and easy to navigate, with a
-                  well-known Start Menu and taskbar that help users quickly
-                  access applications and settings.
-                </li>
-                <li>
-                  <strong className='font-semibold'>
-                    Strong Support for Microsoft Technologies:
-                  </strong>{' '}
-                  Great for developers using .NET, C#, or other
-                  Microsoft-centric tools.
-                </li>
-                <li>
-                  <strong className='font-semibold'>Large User Base:</strong>{' '}
-                  Easier to find solutions and community support for
-                  Windows-related issues.
-                </li>
-              </ul>
-            </div>
-            <div className='md:ml-3'>
-              <h2 className='mt-5 my-2 font-semibold text-lg text-black dark:text-white'>
-                Cons:
-              </h2>
-              <ul className='pl-5 space-y-2 text-black list-disc list-outside dark:text-white'>
-                <li>
-                  <strong className='font-semibold'>
-                    Performance Overhead:
-                  </strong>{' '}
-                  Windows can be resource-intensive, especially with background
-                  processes and updates that may slow down the system over time.
-                </li>
-                <li>
-                  <strong className='font-semibold'>
-                    UI Customization Limits:
-                  </strong>{' '}
-                  While the UI is user-friendly, it offers limited customization
-                  compared to Linux, which might be a drawback for users who
-                  prefer a personalized setup.
-                </li>
-                <li>
-                  <strong className='font-semibold'>Security Concerns:</strong>{' '}
-                  Windows is often targeted by malware, requiring robust
-                  security measures, which can impact performance.
-                </li>
-                <li>
-                  <strong className='font-semibold'>Licensing Costs:</strong>{' '}
-                  Windows is a paid OS, which adds to the overall cost,
-                  especially if you need additional software like Microsoft
-                  Office.
-                </li>
-              </ul>
-            </div>
+        {/* Progress Bar */}
+        <div className="mb-10">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+              Step {currentStep + 1} of {steps.length}
+            </span>
+            <span className="text-sm font-semibold text-purple-600 dark:text-purple-400">
+              {Math.round(((currentStep + 1) / steps.length) * 100)}% Complete
+            </span>
+          </div>
+          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 shadow-inner">
+            <div
+              className="bg-gradient-to-r from-purple-500 to-purple-600 h-4 rounded-full transition-all duration-700 ease-out shadow-sm"
+              style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
+            ></div>
+          </div>
+        </div>
 
-            {/* macOS Section */}
-            <h2 className='font-bold text-xl my-5'>macOS</h2>
-            <div className='py-5 flex justify-center'>
-              <img
-                className=' max-h-32'
-                src='https://upload.wikimedia.org/wikipedia/commons/c/c9/Finder_Icon_macOS_Big_Sur.png'
-                alt='MacOS Logo'
-              />
-            </div>
-            <h3>
-              macOS is Apple's operating system, known for its sleek design,
-              seamless integration with other Apple devices, and strong security
-              features. It’s particularly popular among creative professionals
-              and developers working in the Apple ecosystem.
-            </h3>
-            <div className='md:ml-3'>
-              <h2 className='mt-5 my-2 font-semibold text-lg text-black dark:text-white'>
-                Pros:
-              </h2>
-              <ul className='pl-5 space-y-2 text-black list-disc list-outside dark:text-white'>
-                <li>
-                  <strong className='font-semibold'>Performance:</strong> macOS
-                  is optimized for Apple hardware, providing excellent
-                  performance and stability, particularly on high-end devices
-                  like the MacBook Pro and iMac.
-                </li>
-                <li>
-                  <strong className='font-semibold'>UI:</strong> The user
-                  interface is clean, elegant, and consistent across all
-                  applications, offering a smooth and visually appealing user
-                  experience.
-                </li>
-                <li>
-                  <strong className='font-semibold'>Security:</strong> macOS is
-                  built with strong security features, reducing the risk of
-                  malware and ensuring a stable environment for development.
-                </li>
-                <li>
-                  <strong className='font-semibold'>Unix-based:</strong> macOS’s
-                  Unix foundation provides powerful terminal tools, which are
-                  beneficial for developers who need a reliable command-line
-                  interface.
-                </li>
-              </ul>
-            </div>
-            <div className='md:ml-3'>
-              <h2 className='mt-5 my-2 font-semibold text-lg text-black dark:text-white'>
-                Cons:
-              </h2>
-              <ul className='pl-5 space-y-2 text-black list-disc list-outside dark:text-white'>
-                <li>
-                  <strong className='font-semibold'>Cost:</strong> Apple’s
-                  hardware, which is required to run macOS, is often more
-                  expensive than comparable Windows or Linux systems, making it
-                  less accessible for some users.
-                </li>
-                <li>
-                  <strong className='font-semibold'>UI Customization:</strong>{' '}
-                  While the UI is polished and user-friendly, it offers limited
-                  customization compared to Linux, restricting how users can
-                  personalize their environment.
-                </li>
-                <li>
-                  <strong className='font-semibold'>
-                    Limited Software Availability:
-                  </strong>{' '}
-                  Not all software, especially certain games and niche
-                  development tools, are available on macOS, which can limit
-                  versatility.
-                </li>
-                <li>
-                  <strong className='font-semibold'>
-                    Performance on Lower-End Devices:
-                  </strong>{' '}
-                  macOS is optimized for Apple’s premium hardware, meaning it
-                  may not perform as well on older or less powerful devices.
-                </li>
-              </ul>
-            </div>
-            <h2 className='font-bold text-xl my-5'>Linux</h2>
-            <div className='py-5 flex justify-center'>
-              <img
-                className=' max-w-64'
-                src='https://pngimg.com/d/linux_PNG29.png'
-                alt='Linux Logo'
-              />
-            </div>
-            <h3>
-              Linux is an open-source operating system that offers unparalleled
-              customization and control. It's widely used by developers,
-              particularly those working in server environments, cybersecurity,
-              and system administration.
-            </h3>
-            <div className='md:ml-3'>
-              <h2 className='mt-5 my-2 font-semibold text-lg text-black dark:text-white'>
-                Pros:
-              </h2>
-              <ul className='pl-5 space-y-2 text-black list-disc list-outside dark:text-white'>
-                <li>
-                  <strong className='font-semibold'>Performance:</strong> Linux
-                  is lightweight and efficient, often outperforming other
-                  operating systems on the same hardware. It’s especially
-                  effective on older machines or in environments where system
-                  resources are limited.
-                </li>
-                <li>
-                  <strong className='font-semibold'>UI:</strong> Linux offers a
-                  wide variety of desktop environments (like GNOME, KDE, and
-                  XFCE), allowing users to customize the UI to their liking,
-                  from minimalist to feature-rich setups.
-                </li>
-                <li>
-                  <strong className='font-semibold'>Customization:</strong>{' '}
-                  Linux provides full control over the system, from the desktop
-                  environment to the kernel, allowing developers to tailor the
-                  OS to their specific needs.
-                </li>
-                <li>
-                  <strong className='font-semibold'>
-                    Security and Stability:
-                  </strong>{' '}
-                  Linux is known for its strong security model and stability,
-                  making it ideal for servers and environments where uptime is
-                  critical.
-                </li>
-              </ul>
-            </div>
-            <div className='md:ml-3'>
-              <h2 className='mt-5 my-2 font-semibold text-lg text-black dark:text-white'>
-                Cons:
-              </h2>
-              <ul className='pl-5 space-y-2 text-black list-disc list-outside dark:text-white'>
-                <li>
-                  <strong className='font-semibold'>Learning Curve:</strong> The
-                  command-line interface is powerful but can be intimidating for
-                  beginners, making Linux harder to learn and use initially.
-                </li>
-                <li>
-                  <strong className='font-semibold'>
-                    Software Compatibility:
-                  </strong>{' '}
-                  Not all software is natively compatible with Linux, and while
-                  alternatives or workarounds (like Wine or virtual machines)
-                  exist, they can impact performance or usability.
-                </li>
-                <li>
-                  <strong className='font-semibold'>UI Consistency:</strong>{' '}
-                  While customizable, the variety of desktop environments can
-                  lead to inconsistencies in UI, which might confuse users
-                  transitioning between different Linux distributions.
-                </li>
-                <li>
-                  <strong className='font-semibold'>
-                    Mainstream Software Availability:
-                  </strong>{' '}
-                  Some popular applications, particularly in gaming and
-                  proprietary software, may not be available or require extra
-                  effort to run on Linux.
-                </li>
-              </ul>
-            </div>
-          </li>
-          <li
-            className='justify-center border-y py-10 dark:border-white border-black'
-            id='os-winner'
-          >
-            <h1 className='font-bold text-3xl text-center pb-5'>
-              The Clear OS Winner
-            </h1>
-            <div className='py-5 flex justify-center'>
-              <img
-                className=' max-w-64'
-                src='https://pngimg.com/d/linux_PNG29.png'
-                alt='Linux Logo'
-              />
-            </div>
-            <h3>
-              Linux has established itself as the premier operating system for
-              professionals in computer science and cybersecurity. Its
-              unparalleled flexibility and control make it the go-to platform
-              for developing and testing applications, managing security, and
-              running complex simulations. The operating system’s robust toolset
-              includes essential software for development, penetration testing,
-              and forensic analysis, all of which are integral to the industry.
-              Linux's reputation for stability and security further cements its
-              role as the standard choice in environments where reliability and
-              protection are paramount. For those working in these fields, Linux
-              is not just a tool; it is the foundation upon which much of modern
-              technology is built and secured.
-            </h3>
-            <h2 className='font-bold text-xl my-5'>
-              Popular Linux Distributions in Computer Science and Cybersecurity
-            </h2>
-            <h3>
-              Linux comes in various <strong>distributions (distros)</strong>,
-              each tailored to different needs and preferences. In the fields of
-              computer science and cybersecurity, certain distros have become
-              particularly popular due to their specialized tools, stability,
-              and community support. Linux distros have a{' '}
-              <strong> graphical user interface (GUI) </strong>
-              or a <strong>command line interface (CLI)</strong> or both. Here’s
-              a look at some of the main Linux distributions and how they are
-              used by professionals in these fields:
-            </h3>
-
-            <ol className='my-5 space-y-4 text-black list-decimal list-inside dark:text-white'>
-              <li className='text-lg font-semibold'>
-                Ubuntu* (Both Cybersecurity and Computer Science)
-                <div className='py-5 flex justify-center'>
-                  <img
-                    className=' max-h-32'
-                    src='https://seeklogo.com/images/U/ubuntu-logo-8B7C9ED4AD-seeklogo.com.png'
-                    alt='Ubuntu Logo'
-                  />
-                </div>
-                <ul className='text-base font-normal pl-5 ps-5 mt-2 space-y-2 list-disc'>
-                  <li>
-                    <strong>Overview:</strong> Ubuntu is one of the most popular
-                    and user-friendly Linux distributions, known for its ease of
-                    installation and strong community support. It’s often the
-                    first choice for beginners but also widely used by
-                    professionals for development and testing.
-                  </li>
-                  <li>
-                    <strong>Use in Computer Science:</strong> Ubuntu is favored
-                    for its broad software compatibility, making it ideal for
-                    programming, software development, and running various
-                    development environments. It’s also commonly used in
-                    educational settings for teaching Linux basics.
-                  </li>
-                  <li>
-                    <strong>Use in Cybersecurity:</strong> While not
-                    specifically designed for cybersecurity, Ubuntu serves as a
-                    solid foundation for building custom security tools or
-                    running penetration testing frameworks. Its stability and
-                    ease of use make it a reliable choice for general-purpose
-                    cybersecurity tasks.
-                  </li>
-                  <li>
-                    <strong>UI Details:</strong> Ubuntu comes with a
-                    user-friendly GUI by default, typically using the GNOME
-                    desktop environment, making it accessible to users familiar
-                    with graphical interfaces. It also provides a robust CLI,
-                    which is essential for development tasks, scripting, and
-                    system management.
-                  </li>
-                </ul>
-              </li>
-              <li className='text-lg font-semibold'>
-                Kali Linux (Mainly Cybersecurity)
-                <div className='py-5 flex justify-center'>
-                  <img
-                    className=' max-h-32'
-                    src='https://static-00.iconduck.com/assets.00/distributor-logo-kali-linux-icon-2048x2005-dki611fk.png'
-                    alt='Kali Linux Logo'
-                  />
-                </div>
-                <ul className='text-base font-normal ps-5 mt-2 space-y-2 list-disc list-inside'>
-                  <li>
-                    <strong>Overview</strong>: Kali Linux is a specialized
-                    distribution designed specifically for penetration testing,
-                    ethical hacking, and security research. It comes
-                    pre-installed with hundreds of tools tailored for these
-                    purposes.
-                  </li>
-                  <li>
-                    <strong>Use in Computer Science:</strong> While not a
-                    general-purpose development distro, Kali Linux is invaluable
-                    for computer scientists who need to test the security of
-                    their applications or networks. It’s often used in academic
-                    settings to teach students about cybersecurity practices.
-                  </li>
-                  <li>
-                    <strong>Use in Cybersecurity:</strong> Kali is the go-to
-                    distribution for cybersecurity professionals engaged in
-                    penetration testing, vulnerability assessments, and digital
-                    forensics. Its extensive toolset includes Nmap, Metasploit,
-                    Wireshark, and many others, making it an essential platform
-                    for ethical hackers and security researchers.
-                  </li>
-                  <li>
-                    <strong>UI Details:</strong> Kali Linux offers both a GUI
-                    and CLI, with the XFCE desktop environment as its default
-                    GUI. The GUI is particularly useful for navigating the
-                    extensive suite of tools included in Kali, while the CLI is
-                    indispensable for tasks like network scanning, scripting,
-                    and running penetration tests.
-                  </li>
-                </ul>
-              </li>
-              <li className='text-lg font-semibold'>
-                Fedora (Mainly Computer Science and DevOps/IT)
-                <div className='py-5 flex justify-center'>
-                  <img
-                    className=' max-h-24'
-                    src='https://upload.wikimedia.org/wikipedia/commons/thumb/8/8f/Fedora_logo_%282021%29.svg/1200px-Fedora_logo_%282021%29.svg.png'
-                    alt='Fedora Logo'
-                  />
-                </div>
-                <ul className='text-base font-normal ps-5 mt-2 space-y-2 list-disc list-inside'>
-                  <li>
-                    <strong>Overview:</strong> Fedora is a cutting-edge
-                    distribution sponsored by Red Hat, known for integrating the
-                    latest features and technologies. It’s popular among
-                    developers and system administrators who need a stable and
-                    innovative environment.
-                  </li>
-                  <li>
-                    <strong>Use in Computer Science:</strong> Fedora is often
-                    used by developers who want to work with the latest software
-                    and development tools. Its robust package management and
-                    support for containerization technologies like Docker make
-                    it ideal for modern software development.
-                  </li>
-                  <li>
-                    <strong>Use in Cybersecurity:</strong> Fedora is used in
-                    cybersecurity for its reliability and support for security
-                    tools. While not as specialized as Kali Linux, it’s often
-                    employed in environments where both development and security
-                    tasks are performed.
-                  </li>
-                  <li>
-                    <strong>UI Details:</strong> Fedora provides both a GUI and
-                    CLI, with GNOME as its default desktop environment. The GUI
-                    offers a polished and modern user experience, while the CLI
-                    is powerful and widely used for development, system
-                    administration, and container management.
-                  </li>
-                </ul>
-              </li>
-              <li className='text-lg font-semibold'>
-                CentOS
-                <div className='py-5 flex justify-center'>
-                  <img
-                    className=' max-h-32'
-                    src='https://cdn.freebiesupply.com/logos/large/2x/centos-1-logo-png-transparent.png'
-                    alt='centOS logo'
-                  />
-                </div>
-                <ul className='text-base font-normal ps-5 mt-2 space-y-2 list-disc list-inside'>
-                  <li>
-                    <strong>Overview:</strong> CentOS is a community-driven
-                    distribution that is functionally compatible with Red Hat
-                    Enterprise Linux (RHEL). It’s known for its stability and
-                    long-term support, making it a preferred choice for
-                    enterprise environments.
-                  </li>
-                  <li>
-                    <strong>Use in Computer Science:</strong> CentOS is commonly
-                    used in enterprise software development, particularly in
-                    scenarios where stability and long-term support are crucial.
-                    It’s also popular for running servers and developing
-                    applications intended for RHEL environments.
-                  </li>
-                  <li>
-                    <strong>Use in Cybersecurity:</strong> In cybersecurity,
-                    CentOS is used in environments that require a stable,
-                    secure, and reliable platform for running security tools,
-                    managing servers, and deploying enterprise applications. Its
-                    stability makes it a trusted choice for critical
-                    infrastructure.
-                  </li>
-                  <li>
-                    <strong>UI Details:</strong> CentOS includes both a GUI and
-                    CLI, with GNOME as the typical desktop environment for those
-                    who install the GUI. However, it is often used in a CLI-only
-                    mode, particularly on servers where a graphical interface is
-                    unnecessary and the focus is on stability and performance.
-                  </li>
-                </ul>
-              </li>
-              {/* <li className='font-semibold'>
-                Parrot Security OS
-                <div className='py-5 flex justify-center'>
-                  <img
-                    className=' max-h-32'
-                    src='https://cylab.be/storage/blog/205/files/ZyBJGF6lu6YnQ0XM/parrot_logo2.png'
-                  />
-                </div>
-                <ul className='font-normal ps-5 mt-2 space-y-2 list-disc list-inside'>
-                  <li>Again please don't nest lists if you want</li>
-                  <li>Nobody wants to look at this.</li>
-                  <li>I'm upset that we even have to bother styling this.</li>
-                </ul>
-              </li> */}
-              <li className='font-semibold'>
-                Debian*
-                <div className='py-5 flex justify-center'>
-                  <img
-                    className=' max-h-32'
-                    src='https://cdn.iconscout.com/icon/free/png-256/free-debian-2-202378.png?f=webp'
-                    alt='Debian Logo'
-                  />
-                </div>
-                <ul className='font-normal ps-5 mt-2 space-y-2 list-disc list-inside'>
-                  <li>
-                    <strong>Overview:</strong> Debian is one of the oldest and
-                    most stable Linux distributions. It’s known for its rigorous
-                    testing and commitment to free software, making it a
-                    reliable choice for both servers and desktops.
-                  </li>
-                  <li>
-                    <strong>Use in Computer Science:</strong> Debian’s stability
-                    and extensive package repository make it a favorite among
-                    developers who need a reliable and consistent environment.
-                    It’s also used as the base for many other distributions,
-                    including Ubuntu.
-                  </li>
-                  <li>
-                    <strong>Use in Cybersecurity:</strong> While not as
-                    specialized as Kali or Parrot, Debian is used in
-                    cybersecurity for tasks that require a stable and secure
-                    platform. Its robustness makes it suitable for running
-                    security tools, managing servers, and performing system
-                    hardening.
-                  </li>
-                  <li>
-                    <strong>UI Details:</strong> Debian offers both a GUI and
-                    CLI, with multiple desktop environments available, such as
-                    GNOME, KDE, XFCE, and LXDE. Debian is highly flexible,
-                    allowing users to install a minimal CLI-only system or a
-                    full-featured desktop environment depending on their needs.
-                  </li>
-                </ul>
-              </li>
-            </ol>
-            <h1 className='font-bold'>* Used in CyberPatriot competitions</h1>
-          </li>
-          <li
-            className='justify-center border-t-inherit py-10 dark:border-white border-black'
-            id='what-is-a-vm'
-          >
-            <h1 className='font-bold text-3xl text-center pb-5'>
-              What is a Virtual Machine (VM)?
-            </h1>
-            <div className='py-5 flex justify-center'>
-              <img
-                className=' max-h-24'
-                src='https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/VMware_logo.svg/2560px-VMware_logo.svg.png'
-                alt='VMWare Logo'
-              />
-            </div>
-            <h3 className='py-5'>
-              A virtual machine is an emulation of a computer that runs within
-              your existing OS. It allows you to use another operating system
-              inside of a program on your current operating system (e.g. Running
-              Linux inside of Windows).
-              <span className='block mt-4'>
-                Companies use VMs to optimize resources, reduce costs, and
-                enhance security by running different environments on the same
-                hardware. VMs are essential for testing and development,
-                offering isolated spaces to experiment without affecting the
-                main system. They also play a key role in cybersecurity,
-                providing safe environments for malware analysis and testing
-                security measures. Overall, VMs offer flexibility and efficiency
-                in modern IT infrastructure.
-              </span>
-              <span className='font-semibold block mt-4'>
-                We use virtual machines in PLTW Cybersecurity as well as
-                CyberPatriot.
-              </span>
-            </h3>
-
-            <a
-              className='underline font-semibold hover:text-purple-500'
-              href='https://youtu.be/yIVXjl4SwVo'
-            >
-              Learn More About Virtual Machines Here
-            </a>
-            <h3 className='py-5'>
-              If you want to install a Linux virtual machine, The Odin Project
-              is a free open-source course that teaches full-stack web
-              development. It has a very good tutorial setting up the machine,
-              VSCode, Git, Github, npm, and all other necessities.{' '}
-            </h3>
-            <a
-              className='underline font-semibold hover:text-purple-500'
-              href='https://www.theodinproject.com/'
-            >
-              Link to The Odin Project (Highly Recommend)
-            </a>
-            <h3 className='py-5 font-semibold'>
-              If you are in CyberPatriot, topics about navigating different
-              distros in virtual machines will be covered.
-            </h3>
-          </li>
-          <li
-            className='justify-center border-t py-10 dark:border-white
-            border-black'
-            id='what-is-git'
-          >
-            <h1 className='font-bold text-3xl text-center pb-5'>
-              What is Git (and GitHub)?
-            </h1>
-            <div className='py-5 flex justify-evenly flex-row'>
-              <img
-                className=' max-h-32'
-                src='https://book.git-scm.com/images/logos/downloads/Git-Icon-1788C.png'
-                alt='Git Logo'
-              />
-              <img
-                className='dark:hidden block max-h-32'
-                src='https://pngimg.com/d/github_PNG65.png'
-                alt='GitHub Logo'
-              />
-              <img
-                className='hidden dark:block max-h-32'
-                src={githubLogo}
-                alt='GitHub Logo'
-              />
-            </div>
-            <h3 className='my-5'>
-              Git and GitHub are powerful tools that can greatly enhance the
-              management of your AP Computer Science Create Task project. Git is
-              a version control system that tracks changes to your code,
-              allowing you to experiment and revert to previous versions if
-              needed. It helps you organize your work, making it easier to
-              manage the development process and ensuring that every change is
-              documented.
-              <span className='block mt-4'>
-                GitHub, on the other hand, is an online platform that hosts your
-                Git repositories. It allows you to store your code in the cloud,
-                share it with others, and collaborate on your project in
-                real-time. GitHub also offers tools for issue tracking and
-                project management, helping you stay organized and track your
-                progress. Together, Git and GitHub provide a seamless way to
-                manage, collaborate on, and showcase your Create Task project,
-                ensuring your work is secure, well-organized, and accessible
-                from anywhere.
-              </span>
-              <span className='block mt-5 text-lg font-bold'>
-                Here are some of the benefits of using Git and GitHub:
-              </span>
-            </h3>
-            <ul className='font-normal ps-5 mt-2 space-y-2 list-disc'>
-              <li>
-                <strong>Version Control:</strong> Git tracks every change you
-                make to your code, allowing you to revert to previous versions
-                if needed.
-              </li>
-              <li>
-                <strong>Experimentation:</strong> You can create and test
-                different ideas without fear of losing or overwriting your
-                existing work.
-              </li>
-              <li>
-                <strong>Collaboration:</strong> GitHub allows multiple people to
-                work on the same project simultaneously, making teamwork easy
-                and efficient.
-              </li>
-              <li>
-                <strong>Cloud Storage:</strong> GitHub hosts your project
-                online, ensuring your code is backed up and accessible from any
-                device.
-              </li>
-              <li>
-                <strong>Project Management:</strong> GitHub provides tools for
-                tracking issues, tasks, and progress, helping you stay organized
-                throughout your project.
-              </li>
-              <li>
-                <strong>Documentation:</strong> Both Git and GitHub
-                automatically document the history of your project, which can be
-                useful for reflecting on your development process.
-              </li>
-            </ul>
-            <a
-              className='text-lg block mt-5 font-bold underline hover:text-purple-500'
-              href='https://docs.github.com/en/get-started/start-your-journey/creating-an-account-on-github'
-            >
-              Learn how to set up a GitHub account
-            </a>
-
-            <a
-              className='text-lg block mt-5 font-bold hover:text-purple-500 underline'
-              href='https://www.youtube.com/watch?v=mR9jhYD3bnI'
-            >
-              Once you create your GitHub account, learn how to link it to
-              VSCode with this video.
-            </a>
-          </li>
-          <li
-            className='justify-center border-t py-10 dark:border-white
-            border-black'
-            id='useful-vscode-extensions'
-          >
-            <h1 className='font-bold text-3xl text-center pb-5'>
-              Useful VSCode Extensions
-            </h1>
-            <div className='py-5 flex justify-evenly flex-row'>
-              <img
-                className=' max-h-32'
-                src='https://eamodio.gallerycdn.vsassets.io/extensions/eamodio/gitlens/2024.8.1005/1723280937107/Microsoft.VisualStudio.Services.Icons.Default'
-                alt='GitLense Logo'
-              />
-              <img
-                className='block max-h-32'
-                src='https://usernamehw.gallerycdn.vsassets.io/extensions/usernamehw/errorlens/3.20.0/1719044874383/Microsoft.VisualStudio.Services.Icons.Default'
-                alt='Error Lens Logo'
-              />
-              <img
-                className='block max-h-32'
-                src='https://seeklogo.com/images/P/prettier-logo-D5C5197E37-seeklogo.com.png'
-                alt='Prettier Logo'
-              />
-              <img
-                className='block max-h-32'
-                src='https://kevinrose.gallerycdn.vsassets.io/extensions/kevinrose/vsc-python-indent/1.18.0/1664843036457/Microsoft.VisualStudio.Services.Icons.Default'
-                alt='Python Indent Logo'
-              />
-            </div>
-            <h3 className='my-5'>
-              <span className='block mt-4'></span>
-            </h3>
-            <ol className='my-5 space-y-4 text-black list-decimal list-inside dark:text-white'>
-              <li className='text-lg font-semibold'>
-                Git Lens
-                <div className='py-5 flex justify-center'>
-                  <img
-                    className=' max-h-32'
-                    src='https://eamodio.gallerycdn.vsassets.io/extensions/eamodio/gitlens/2024.8.1005/1723280937107/Microsoft.VisualStudio.Services.Icons.Default'
-                    alt='Git Lens Logo'
-                  />
-                </div>
-                <ul className='text-base font-normal pl-5 ps-5 mt-2 space-y-2 list-disc'>
-                  <li>
-                    <strong>Purpose:</strong> Enhances Git capabilities within
-                    VS Code by providing detailed insights into code changes,
-                    authorship, and history.
-                  </li>
-                  <li>
-                    <strong>Benefits:</strong> Helps track the development
-                    process and understand code evolution, making it easier to
-                    manage and document your project.
-                  </li>
-                </ul>
-              </li>
-              <li className='text-lg font-semibold'>
-                Error Lens
-                <div className='py-5 flex justify-center'>
-                  <img
-                    className=' max-h-32'
-                    src='https://usernamehw.gallerycdn.vsassets.io/extensions/usernamehw/errorlens/3.20.0/1719044874383/Microsoft.VisualStudio.Services.Icons.Default'
-                    alt='Error Lens Logo'
-                  />
-                </div>
-                <ul className='text-base font-normal pl-5 ps-5 mt-2 space-y-2 list-disc'>
-                  <li>
-                    <strong>Purpose:</strong> Displays errors, warnings, and
-                    other diagnostic messages directly inline with your code.
-                  </li>
-                  <li>
-                    <strong>Benefits:</strong> Improves visibility of issues,
-                    allowing for quicker detection and resolution of coding
-                    problems.
-                  </li>
-                </ul>
-              </li>
-              <li className='text-lg font-semibold'>
-                Prettier
-                <div className='py-5 flex justify-center'>
-                  <img
-                    className=' max-h-32'
-                    src='https://seeklogo.com/images/P/prettier-logo-D5C5197E37-seeklogo.com.png'
-                    alt='Prettier Logo'
-                  />
-                </div>
-                <ul className='text-base font-normal pl-5 ps-5 mt-2 space-y-2 list-disc'>
-                  <li>
-                    <strong>Purpose:</strong> Automatically formats code to be
-                    clean, consistent, and easy to read.
-                  </li>
-                  <li>
-                    <strong>Benefits:</strong> Ensures that your code adheres to
-                    a uniform style, making it more readable and maintainable.
-                  </li>
-                </ul>
-              </li>
-              <li className='text-lg font-semibold'>
-                Prettier
-                <div className='py-5 flex justify-center'>
-                  <img
-                    className=' max-h-32'
-                    src='https://kevinrose.gallerycdn.vsassets.io/extensions/kevinrose/vsc-python-indent/1.18.0/1664843036457/Microsoft.VisualStudio.Services.Icons.Default'
-                    alt='Python Indent Logo'
-                  />
-                </div>
-                <ul className='text-base font-normal pl-5 ps-5 mt-2 space-y-2 list-disc'>
-                  <li>
-                    <strong>Purpose:</strong> Provides better control over
-                    Python indentation, helping you manage tabs and spaces more
-                    effectively.
-                  </li>
-                  <li>
-                    <strong>Benefits:</strong> Prevents common indentation
-                    errors in Python, which are crucial to maintaining code
-                    structure and avoiding syntax issues.
-                  </li>
-                </ul>
-              </li>
-            </ol>
-          </li>
-          <li
-            className='justify-center border-t py-10 dark:border-white
-            border-black'
-            id='conclusion'
-          >
-            <h1 className='font-bold text-3xl text-center pb-5'>Next Steps</h1>
-            <div className='flex flex-col items-center justify-between md:flex-row md:justify-evenly pt-5'>
-              <div className='max-w-xs p-5 bg-white border border-gray-200 rounded-lg shadow dark:bg-black dark:border-purple-500 dark:shadow-[0_0_2px_#fff,inset_0_0_2px_#fff,0_0_5px_#a855f7,0_0_15px_#a855f7,0_0_30px_#a855f7]'>
-                <Link to='#'>
-                  <h5 className='mb-2 text-2xl text-center font-bold tracking-tight text-gray-900 dark:text-white'>
-                    AP CSP
-                  </h5>
-                </Link>
-              </div>
-              <div className='max-w-xs p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-black dark:border-purple-500 dark:shadow-[0_0_2px_#fff,inset_0_0_2px_#fff,0_0_5px_#a855f7,0_0_15px_#a855f7,0_0_30px_#a855f7]'>
-                <Link to='#'>
-                  <h5 className='mb-2 text-2xl text-center font-bold tracking-tight text-gray-900 dark:text-white'>
-                    Cybersecurity
-                  </h5>
-                </Link>
-              </div>
-
-              <div className='max-w-xs p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-black dark:border-purple-500 dark:shadow-[0_0_2px_#fff,inset_0_0_2px_#fff,0_0_5px_#a855f7,0_0_15px_#a855f7,0_0_30px_#a855f7]'>
-                <Link to='#'>
-                  <h5 className='mb-2 text-2xl text-center font-bold tracking-tight text-gray-900 dark:text-white'>
-                    Resources
-                  </h5>
-                </Link>
-              </div>
-            </div>
-          </li>
-        </ul>
-      </div>
-      {/* </div> */}
-      {/* Button to Toggle Drawer */}
-      <button
-        className='fixed top-1/2 left-0 transform -translate-y-1/2 bg-amber-50 text-black dark:bg-black dark:text-white p-3 h-16 flex items-center justify-center rounded-r-lg focus:outline-none flex-wrap border-black  border dark:border-l-black  dark:border-purple-500 dark:shadow-[0_0_2px_#fff,inset_0_0_2px_#fff,0_0_5px_#a855f7,0_0_15px_#a855f7,0_0_30px_#a855f7]'
-        onClick={toggleDrawer}
-      >
-        <span className='hidden md:block transform text-lg font-bold'>
-          Content
-        </span>
-        <svg
-          aria-hidden='true'
-          className='w-6 h-6 transform rotate-[-90deg]'
-          fill='currentColor'
-          viewBox='0 0 20 20'
-          xmlns='http://www.w3.org/2000/svg'
-        >
-          <path
-            fillRule='evenodd'
-            d='M6.293 9.293a1 1 0 011.414 0L10 11.586l2.293-2.293a1 1 0 111.414 1.414L10 14.414l-4.293-4.293a1 1 0 010-1.414z'
-            clipRule='evenodd'
-          ></path>
-        </svg>
-      </button>
-
-      {/* Drawer Component */}
-      <div
-        id='drawer-navigation'
-        className={`fixed top-[70px] left-0 z-40 w-64 bg:w-72  h-screen p-4 overflow-y-auto transition-transform ${
-          isDrawerOpen ? 'translate-x-0' : '-translate-x-full dark:shadow-none'
-        } border-r-black bg-amber-50 dark:bg-black border-r dark:border-purple-500 dark:shadow-[0_0_2px_#fff,inset_0_0_2px_#fff,0_0_5px_#a855f7,0_0_15px_#a855f7,0_0_30px_#a855f7]`}
-        tabIndex='-1'
-        aria-labelledby='drawer-navigation-label'
-      >
-        <h5
-          id='drawer-navigation-label'
-          className='text-base font-semibold text-black dark:text-white uppercase'
-        >
-          Content
-        </h5>
-        <button
-          type='button'
-          onClick={toggleDrawer}
-          aria-controls='drawer-navigation'
-          className='text-black dark:text-white bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 absolute top-2.5 end-2.5 inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white'
-        >
-          <svg
-            aria-hidden='true'
-            className='w-5 h-5'
-            fill='currentColor'
-            viewBox='0 0 20 20'
-            xmlns='http://www.w3.org/2000/svg'
-          >
-            <path
-              fillRule='evenodd'
-              d='M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z'
-              clipRule='evenodd'
-            ></path>
-          </svg>
-          <span className='sr-only'>Close menu</span>
-        </button>
-        <div className='py-4 overflow-y-auto'>
-          <ul className='space-y-2 font-medium'>
-            {/* List of navigation items */}
-            <li>
-              <a
-                href='#overview'
-                className='flex items-center p-2 text-black rounded-lg dark:hover:text-purple-500 hover:text-purple-500 dark:text-white group'
+        {/* Step Navigation */}
+        <div className="mb-12">
+          <div className="flex flex-wrap justify-center gap-3">
+            {steps.map((step, index) => (
+              <button
+                key={step.id}
+                onClick={() => handleStepClick(index)}
+                className={`flex items-center space-x-2 px-5 py-3 rounded-xl text-sm font-semibold transition-all duration-300 ${
+                  index === currentStep
+                    ? 'bg-purple-600 text-white shadow-lg transform scale-105'
+                    : completedSteps.includes(step.id)
+                    ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 hover:bg-green-200 dark:hover:bg-green-800'
+                    : 'bg-amber-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-amber-200 dark:hover:bg-gray-700 hover:transform hover:scale-105'
+                }`}
               >
-                <span className='ms-3'>Overview</span>
-              </a>
-            </li>
-            <li>
-              <a
-                href='#understanding-os'
-                className='flex items-center p-2 text-black rounded-lg dark:hover:text-purple-500 hover:text-purple-500 dark:text-white group'
-              >
-                <span className='ms-3'>Understanding OS</span>
-              </a>
-            </li>
-            <li>
-              <a
-                href='#os-winner'
-                className='flex items-center p-2 text-black rounded-lg dark:hover:text-purple-500 hover:text-purple-500 dark:text-white group'
-              >
-                <span className='ms-3'>The Clear OS Winner</span>
-              </a>
-            </li>
-            <li>
-              <a
-                href='#what-is-a-vm'
-                className='flex items-center p-2 text-black rounded-lg dark:hover:text-purple-500 hover:text-purple-500 dark:text-white group'
-              >
-                <span className='ms-3'>What is a Virtual Machine?</span>
-              </a>
-            </li>
-            <li>
-              <a
-                href='#what-is-git'
-                className='flex items-center p-2 text-black rounded-lg dark:hover:text-purple-500 hover:text-purple-500 dark:text-white group'
-              >
-                <span className='ms-3'>What is Git (and GitHub)?</span>
-              </a>
-            </li>
-            <li>
-              <a
-                href='#useful-vscode-extensions'
-                className='flex items-center p-2 text-black rounded-lg dark:hover:text-purple-500 hover:text-purple-500 dark:text-white group'
-              >
-                <span className='ms-3'>Useful VSCode Extensions</span>
-              </a>
-            </li>
-          </ul>
+                <span className="text-lg">{step.icon}</span>
+                <span className="hidden sm:inline">{step.title}</span>
+                {completedSteps.includes(step.id) && (
+                  <span className="text-green-600 dark:text-green-400 text-lg">✓</span>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="bg-amber-50 dark:bg-black border border-black dark:border-purple-500 rounded-xl p-10 shadow-lg">
+          {renderStepContent()}
+        </div>
+
+        {/* Footer */}
+        <div className="text-center mt-12 p-8 bg-amber-50 dark:bg-black border border-black dark:border-purple-500 rounded-xl shadow-lg">
+          <p className="text-lg text-gray-600 dark:text-gray-300 mb-3">
+            Need help? Contact your teacher or check the course materials.
+          </p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            This guide covers the basics - you'll learn much more in your courses!
+          </p>
         </div>
       </div>
     </div>

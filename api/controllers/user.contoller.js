@@ -19,16 +19,26 @@ export const updateUser = async (req, res, next) => {
             req.body.password = bcryptjs.hashSync(req.body.password, 10);
         }
 
+        const updateData = {
+            username: req.body.username,
+            email: req.body.email,
+            password: req.body.password,
+            profilePicture: req.body.profilePicture,
+        };
+
+               // Handle checklist progress updates
+               if (req.body.checklistProgress) {
+                   updateData.checklistProgress = req.body.checklistProgress;
+               }
+
+               // Handle CyberPatriot progress updates
+               if (req.body.cyberPatriotProgress) {
+                   updateData.cyberPatriotProgress = req.body.cyberPatriotProgress;
+               }
+
         const updatedUser = await User.findByIdAndUpdate(
             req.params.id,
-            {
-                $set: {
-                    username: req.body.username,
-                    email: req.body.email,
-                    passsword: req.body.password,
-                    profilePicture: req.body.profilePicture,
-                },
-            },
+            { $set: updateData },
             { new: true }
         );
         const { password, ...rest } = updatedUser._doc;
