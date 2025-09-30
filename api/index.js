@@ -22,7 +22,10 @@ const app = express();
 
 // Add CORS configuration
 app.use(cors({
-  origin: 'http://localhost:5173', // Your Vite dev server URL
+  origin: [
+    'http://localhost:5173', // Development
+    'https://cs-at-sjdls.vercel.app' // Production (update this with your actual Vercel URL)
+  ],
   credentials: true, // Allow cookies to be sent
 }));
 
@@ -30,8 +33,22 @@ app.use(express.json());
 
 app.use(cookieParser());
 
-app.listen(3000, () => {
-    console.log('Server listening on port 3000!');
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+    console.log(`Server listening on port ${PORT}!`);
+});
+
+// Add a root route for testing
+app.get('/', (req, res) => {
+    res.json({ 
+        message: 'CS at SJDLS API is running!', 
+        status: 'success',
+        endpoints: {
+            auth: '/api/auth',
+            user: '/api/user'
+        }
+    });
 });
 
 app.use("/api/user", userRoutes);
