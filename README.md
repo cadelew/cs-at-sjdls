@@ -22,4 +22,23 @@ A web app built for SJDLS students to learn computer science, prep for AP CSP, a
 | Auth / Storage | Firebase |
 | Hosting | Vercel (frontend) + Render (backend) + MongoDB Atlas |
 
+
+## 📸 Preview (Light & Dark Mode)
+
+<table>
+  <tr>
+    <td align="center"><strong>AP CSP Review & Practice</strong></td>
+    <td align="center"><strong>Git & GitHub Setup (Dark Mode)</strong></td>
+  </tr>
+  <tr>
+    <td><img src="./screenshots/Screenshot 2025-09-30 011038.png" width="400"/></td>
+    <td><img src="./screenshots/Screenshot 2025-09-30 010959.png" width="400"/></td>
+  </tr>
+</table>
+
+<br/>
+
+**AP CSP Create Task Checklist (Dark Mode)**  
+<img src="./screenshots/Screenshot 2025-09-30 010828.png"/>
+
  
