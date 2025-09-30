@@ -41,4 +41,6 @@ A web app built for SJDLS students to learn computer science, prep for AP CSP, a
 **AP CSP Create Task Checklist (Dark Mode)**  
 <img src="./screenshots/Screenshot 2025-09-30 010828.png"/>
 
+**AP CSP Practice Problems are still in dev
+
  
