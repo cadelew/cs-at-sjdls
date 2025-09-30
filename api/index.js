@@ -24,7 +24,7 @@ const app = express();
 app.use(cors({
   origin: [
     'http://localhost:5173', // Development
-    'https://cs-at-sjdls.vercel.app' // Production (update this with your actual Vercel URL)
+    'https://cs-at-sjdls.vercel.app/' // Production
   ],
   credentials: true, // Allow cookies to be sent
 }));
