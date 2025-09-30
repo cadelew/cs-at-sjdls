@@ -1,5 +1,5 @@
-import { GoogleAuthProvider, signInWithPopup, getAuth } from 'firebase/auth';
-import { app } from '../firebase';
+import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { auth } from '../firebase';
 import { useDispatch } from 'react-redux';
 import { signInSuccess } from '../redux/user/userSlice';
 import { useNavigate } from 'react-router-dom';
@@ -10,10 +10,8 @@ export default function OAuth() {
   const handleGoogleClick = async () => {
     try {
       const provider = new GoogleAuthProvider();
-      const auth = getAuth(app);
-
       const result = await signInWithPopup(auth, provider);
-      const res = await fetch('/api/auth/google', {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'}/api/auth/google`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
