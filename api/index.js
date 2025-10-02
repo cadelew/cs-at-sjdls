@@ -3,6 +3,9 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import userRoutes from './routes/user.route.js';
 import authRoutes from './routes/auth.route.js';
+import quizRoutes from './routes/quiz.route.js';
+import questionRoutes from './routes/question.route.js';
+import quizStatRoutes from './routes/quizStat.route.js';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 
@@ -53,6 +56,9 @@ app.get('/', (req, res) => {
 
 app.use("/api/user", userRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/quiz', quizRoutes);
+app.use('/api/question', questionRoutes);
+app.use('/api/quizStat', quizStatRoutes);
 
 app.use((err, req, res, next) => {
     const statusCode = err.statusCode || 500;
