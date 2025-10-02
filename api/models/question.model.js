@@ -1,14 +1,13 @@
 import mongoose from "mongoose";
-import { ObjectId } from "mongoose.Schema.Types";
 
 const questionSchema = new mongoose.Schema({
-    quizId: ObjectId,
+    quizId: String,
     questionsText: String,
     options: [String],
     correctAnswer: Number,
     explanation: String,
     topic: String,
-    points: Number,
+    points: Number, 
     tags: [String]
 });
 

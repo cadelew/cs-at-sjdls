@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { ObjectId } from "mongoose.Schema.Types";
+const { ObjectId } = mongoose.Schema.Types;
 
 
 const quizSchema = new mongoose.Schema({

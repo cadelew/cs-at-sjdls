@@ -9,7 +9,7 @@ import quizStatRoutes from './routes/quizStat.route.js';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 
-dotenv.config();
+dotenv.config({path: './api/.env'});
 
  /* if MongoDB is connected, then prints "Connected to MongoDB" */
 mongoose.connect(process.env.MONGO).then(() => {

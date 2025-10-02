@@ -5,7 +5,7 @@ import { errorHandler } from '../utils/error.js';
 export const getQuizzes = async (req, res, next) => {
     const { sortBy, order } = req.query;
     const allowedSortBy = ['topic', 'difficulty', 'timeLimit', 'totalQuestions', 'title'];
-    const sortField = allowedSortFields.includes(sortBy) ? sortBy : 'title';
+    const sortField = allowedSortBy.includes(sortBy) ? sortBy : 'title';
     const sortOrder = order === 'asc' ? 1 : -1;
     
     try {
