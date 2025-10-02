@@ -58,7 +58,7 @@ app.use("/api/user", userRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/quiz', quizRoutes);
 app.use('/api/question', questionRoutes);
-app.use('/api/quizStat', quizStatRoutes);
+app.use('/api/quiz-stat', quizStatRoutes);
 
 app.use((err, req, res, next) => {
     const statusCode = err.statusCode || 500;
