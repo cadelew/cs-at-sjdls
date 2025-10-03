@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
+import { PerformanceTrendsChart, TopicPerformanceChart, ScoreDistributionChart } from '../components/charts';
 
 export default function UserDashboard() {
   const { currentUser } = useSelector((state) => state.user);
@@ -207,37 +208,10 @@ export default function UserDashboard() {
                   </div>
                 </div>
 
-                {/* Recent Performance */}
-                <div className="bg-amber-50 dark:bg-black border border-black dark:border-purple-500 rounded-lg p-6">
-                  <h3 className="text-xl font-semibold text-black dark:text-white mb-4">
-                    Recent Performance
-                  </h3>
-                  {analytics.recentPerformance.length > 0 ? (
-                    <div className="space-y-3">
-                      {analytics.recentPerformance.slice(0, 5).map((attempt, index) => (
-                        <div key={index} className="flex items-center justify-between p-3 bg-amber-100 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium text-black dark:text-white">
-                              {attempt.quizTitle}
-                            </div>
-                            <div className="text-sm text-gray-600 dark:text-gray-400">
-                              {formatDate(attempt.completedAt)}
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <div className={`font-bold ${getScoreColor(attempt.score)}`}>
-                              {attempt.score}%
-                            </div>
-                            <div className="text-sm text-gray-600 dark:text-gray-400">
-                              {formatTime(attempt.timeTaken)}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-gray-600 dark:text-gray-400">No recent quiz attempts</p>
-                  )}
+                {/* Performance Chart */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <PerformanceTrendsChart data={analytics} />
+                  <ScoreDistributionChart data={analytics} />
                 </div>
 
                 {/* Topic Performance */}
@@ -337,10 +311,18 @@ export default function UserDashboard() {
           <div className="space-y-6">
             {analytics && analytics.totalQuizzes > 0 ? (
               <>
-                {/* Performance Trends */}
+                {/* Charts Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <PerformanceTrendsChart data={analytics} />
+                  <ScoreDistributionChart data={analytics} />
+                </div>
+                
+                <TopicPerformanceChart data={analytics} />
+
+                {/* Additional Analytics */}
                 <div className="bg-amber-50 dark:bg-black border border-black dark:border-purple-500 rounded-lg p-6">
                   <h3 className="text-xl font-semibold text-black dark:text-white mb-4">
-                    Performance Trends
+                    📊 Additional Insights
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
