@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
@@ -18,6 +18,8 @@ export default function QuizTaking() {
   const [submitting, setSubmitting] = useState(false);
   const [isResumed, setIsResumed] = useState(false);
   const [showSaveNotification, setShowSaveNotification] = useState(false);
+  const [hasUnsavedProgress, setHasUnsavedProgress] = useState(false);
+  const timeRemainingRef = useRef(null);
 
   useEffect(() => {
     if (id) {
@@ -25,18 +27,108 @@ export default function QuizTaking() {
     }
   }, [id]);
 
+  // Handle page unload (tab close, navigation, refresh)
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      // Only show warning if there's progress to save
+      if (Object.keys(answers).length > 0 || currentQuestion > 0) {
+        e.preventDefault();
+        e.returnValue = 'Do you want to save your progress before leaving?';
+        return 'Do you want to save your progress before leaving?';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [answers, currentQuestion]);
+
+  // Track unsaved progress
+  useEffect(() => {
+    const hasProgress = Object.keys(answers).length > 0 || currentQuestion > 0;
+    setHasUnsavedProgress(hasProgress);
+  }, [answers, currentQuestion]);
+
+  // Handle navigation protection
+  useEffect(() => {
+    const handleClick = (e) => {
+      if (!hasUnsavedProgress) return;
+      
+      // Find the closest link element
+      const link = e.target.closest('a');
+      if (!link) return;
+      
+      // Check if it's a navigation link (React Router Link)
+      const href = link.getAttribute('href');
+      if (!href || href.startsWith('#')) return;
+      
+      // Prevent the default navigation
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const shouldProceed = window.confirm(
+        "Do you want to save your progress before leaving? Click OK to save and continue, or Cancel to stay on this page."
+      );
+      
+      if (shouldProceed) {
+        saveProgress().then(() => {
+          // Navigate after saving
+          if (href.startsWith('/')) {
+            navigate(href);
+          } else {
+            window.location.href = href;
+          }
+        });
+      }
+    };
+
+    const handlePopState = (e) => {
+      if (hasUnsavedProgress) {
+        const shouldProceed = window.confirm(
+          "Do you want to save your progress before leaving? Click OK to save and continue, or Cancel to stay on this page."
+        );
+        
+        if (shouldProceed) {
+          saveProgress().then(() => {
+            // Allow the navigation to proceed
+            window.history.back();
+          });
+        } else {
+          // Push current state back to prevent navigation
+          window.history.pushState(null, '', window.location.href);
+        }
+      }
+    };
+
+    // Add event listeners with capture to intercept early
+    document.addEventListener('click', handleClick, true);
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      document.removeEventListener('click', handleClick, true);
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [hasUnsavedProgress, navigate]);
+
   useEffect(() => {
     let timer;
     if (timeRemaining !== null && timeRemaining > 0) {
       timer = setTimeout(() => {
-        console.log('Timer tick:', timeRemaining, '->', timeRemaining - 1);
-        setTimeRemaining(timeRemaining - 1);
+        const newTime = timeRemaining - 1;
+        setTimeRemaining(newTime);
+        timeRemainingRef.current = newTime; // Keep ref in sync
       }, 1000);
     } else if (timeRemaining === 0) {
-      console.log('Time up! Auto-submitting quiz...');
       handleSubmitQuiz();
     }
     return () => clearTimeout(timer);
+  }, [timeRemaining]);
+
+  // Keep ref in sync with state
+  useEffect(() => {
+    timeRemainingRef.current = timeRemaining;
   }, [timeRemaining]);
 
   const fetchQuizData = async () => {
@@ -85,11 +177,9 @@ export default function QuizTaking() {
           
           // Set timer from saved time or quiz time limit
           if (incompleteAttempt.timeRemaining !== null && incompleteAttempt.timeRemaining !== undefined) {
-            console.log('Resuming with saved time:', incompleteAttempt.timeRemaining, 'seconds');
             setTimeRemaining(incompleteAttempt.timeRemaining);
           } else if (quiz.timeLimit) {
             const timeInSeconds = quiz.timeLimit * 60;
-            console.log('Resuming with quiz time limit:', quiz.timeLimit, 'minutes =', timeInSeconds, 'seconds');
             setTimeRemaining(timeInSeconds);
           }
           
@@ -191,6 +281,9 @@ export default function QuizTaking() {
   const saveProgress = async () => {
     if (!quizAttemptId) return;
     
+    // Get the current timer value using ref to avoid stale closure
+    const currentTimeRemaining = timeRemainingRef.current;
+    
     try {
       const response = await fetch(`http://localhost:3000/api/quiz-stat/${quizAttemptId}/save`, {
         method: 'PUT',
@@ -199,7 +292,7 @@ export default function QuizTaking() {
         },
         body: JSON.stringify({
           currentQuestion: currentQuestion,
-          timeRemaining: timeRemaining
+          timeRemaining: currentTimeRemaining
         }),
       });
       
@@ -217,6 +310,7 @@ export default function QuizTaking() {
   const handleBackToQuizList = async () => {
     // Always save progress automatically before leaving
     await saveProgress();
+    setHasUnsavedProgress(false); // Clear unsaved progress flag
     // Navigate immediately with save success state
     navigate('/quiz-list', { state: { saveSuccess: true } });
   };
@@ -238,6 +332,7 @@ export default function QuizTaking() {
     
     try {
       setSubmitting(true);
+      setHasUnsavedProgress(false); // Clear unsaved progress flag
       
       // Calculate score
       const correctAnswers = Object.entries(answers).filter(([questionId, chosenAnswer]) => {

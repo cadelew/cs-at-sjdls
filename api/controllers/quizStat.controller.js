@@ -100,6 +100,7 @@ export const saveQuizProgress = async (req, res, next) => {
         quizStat.lastSaved = new Date();
         
         await quizStat.save();
+        
         res.status(200).json({ message: 'Progress saved successfully', quizStat });
     } catch (error) {
         next(error);
