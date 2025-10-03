@@ -1,17 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 export default function QuizList() {
+  const location = useLocation();
   const [quizzes, setQuizzes] = useState([]);
   const [questionCounts, setQuestionCounts] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [sortBy, setSortBy] = useState('title');
   const [order, setOrder] = useState('asc');
+  const [showSaveNotification, setShowSaveNotification] = useState(false);
 
   useEffect(() => {
     fetchQuizzes();
   }, [sortBy, order]);
+
+  useEffect(() => {
+    // Check if we came from a quiz save action
+    if (location.state?.saveSuccess) {
+      setShowSaveNotification(true);
+      setTimeout(() => setShowSaveNotification(false), 3000);
+      // Clear the state to prevent showing again on refresh
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   const fetchQuizzes = async () => {
     try {
@@ -104,6 +116,16 @@ export default function QuizList() {
 
   return (
     <div className="min-h-screen bg-amber-50 dark:bg-black pt-24 p-6">
+      {/* Save Notification Popup */}
+      {showSaveNotification && (
+        <div className="fixed top-20 right-6 z-50 transform transition-all duration-300 ease-in-out animate-pulse">
+          <div className="bg-green-50 dark:bg-green-900 border border-green-400 text-green-800 dark:text-green-200 px-4 py-3 rounded-lg shadow-lg flex items-center space-x-2">
+            <span className="text-green-600 dark:text-green-400">✓</span>
+            <span className="font-medium">Progress saved successfully!</span>
+          </div>
+        </div>
+      )}
+      
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">

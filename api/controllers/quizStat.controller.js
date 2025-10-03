@@ -83,4 +83,43 @@ export const getQuizStat = async (req, res, next) => {
     }
 }
 
+// Save quiz progress (for resume functionality)
+export const saveQuizProgress = async (req, res, next) => {
+    const { attemptid } = req.params;
+    const { currentQuestion, timeRemaining } = req.body;
+    
+    try {
+        const quizStat = await QuizStat.findById(attemptid);
+        if (!quizStat) {
+            return next(errorHandler(404, 'Quiz attempt not found'));
+        }
+        
+        // Update progress fields
+        quizStat.currentQuestion = currentQuestion;
+        quizStat.timeRemaining = timeRemaining;
+        quizStat.lastSaved = new Date();
+        
+        await quizStat.save();
+        res.status(200).json({ message: 'Progress saved successfully', quizStat });
+    } catch (error) {
+        next(error);
+    }
+}
+
+// Get user's quiz attempts for a specific quiz
+export const getUserQuizAttempts = async (req, res, next) => {
+    const { quizId, userId } = req.params;
+    
+    try {
+        const attempts = await QuizStat.find({ 
+            quizId: quizId, 
+            userId: userId 
+        }).sort({ createdAt: -1 });
+        
+        res.status(200).json(attempts);
+    } catch (error) {
+        next(error);
+    }
+}
+
 

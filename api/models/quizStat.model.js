@@ -19,6 +19,13 @@ const quizStatSchema = new mongoose.Schema({
     skippedQuestions: Number,
     totalTimeTaken: Number,
     completedAt: Date,
+    // Progress tracking fields
+    currentQuestion: { type: Number, default: 0 },
+    timeRemaining: Number,
+    lastSaved: Date,
+    isCompleted: { type: Boolean, default: false }
+}, {
+    timestamps: true // Adds createdAt and updatedAt automatically
 });
 
 export default mongoose.model('QuizStat', quizStatSchema);

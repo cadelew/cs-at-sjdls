@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
 export default function QuizTaking() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { currentUser } = useSelector((state) => state.user);
   
   const [quiz, setQuiz] = useState(null);
   const [questions, setQuestions] = useState([]);
@@ -14,6 +16,8 @@ export default function QuizTaking() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [isResumed, setIsResumed] = useState(false);
+  const [showSaveNotification, setShowSaveNotification] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -23,11 +27,13 @@ export default function QuizTaking() {
 
   useEffect(() => {
     let timer;
-    if (timeRemaining > 0) {
+    if (timeRemaining !== null && timeRemaining > 0) {
       timer = setTimeout(() => {
+        console.log('Timer tick:', timeRemaining, '->', timeRemaining - 1);
         setTimeRemaining(timeRemaining - 1);
       }, 1000);
     } else if (timeRemaining === 0) {
+      console.log('Time up! Auto-submitting quiz...');
       handleSubmitQuiz();
     }
     return () => clearTimeout(timer);
@@ -53,13 +59,8 @@ export default function QuizTaking() {
       const questionsData = await questionsResponse.json();
       setQuestions(questionsData);
       
-      // Start quiz attempt
-      await startQuizAttempt(quizData._id);
-      
-      // Set timer if quiz has time limit
-      if (quizData.timeLimit) {
-        setTimeRemaining(quizData.timeLimit * 60); // Convert minutes to seconds
-      }
+      // Check for existing attempts first
+      await checkForExistingAttempt(quizData._id);
       
       setError(null);
     } catch (err) {
@@ -69,7 +70,53 @@ export default function QuizTaking() {
     }
   };
 
-  const startQuizAttempt = async (quizId) => {
+  const checkForExistingAttempt = async (quizId) => {
+    try {
+      const userId = currentUser?._id || 'anonymous';
+      const response = await fetch(`http://localhost:3000/api/quiz-stat/quiz/${quizId}/user/${userId}`);
+      if (response.ok) {
+        const attempts = await response.json();
+        const incompleteAttempt = attempts.find(attempt => !attempt.isCompleted);
+        
+        if (incompleteAttempt) {
+          // Resume existing attempt
+          setQuizAttemptId(incompleteAttempt._id);
+          setCurrentQuestion(incompleteAttempt.currentQuestion || 0);
+          
+          // Set timer from saved time or quiz time limit
+          if (incompleteAttempt.timeRemaining !== null && incompleteAttempt.timeRemaining !== undefined) {
+            console.log('Resuming with saved time:', incompleteAttempt.timeRemaining, 'seconds');
+            setTimeRemaining(incompleteAttempt.timeRemaining);
+          } else if (quiz.timeLimit) {
+            const timeInSeconds = quiz.timeLimit * 60;
+            console.log('Resuming with quiz time limit:', quiz.timeLimit, 'minutes =', timeInSeconds, 'seconds');
+            setTimeRemaining(timeInSeconds);
+          }
+          
+          setIsResumed(true);
+          
+          // Load existing answers
+          const existingAnswers = {};
+          incompleteAttempt.answers.forEach(answer => {
+            existingAnswers[answer.questionId] = answer.chosenAnswer;
+          });
+          setAnswers(existingAnswers);
+        } else {
+          // Start new attempt
+          await startQuizAttempt(quizId, quiz);
+        }
+      } else {
+        // Start new attempt if no existing attempts
+        await startQuizAttempt(quizId, quiz);
+      }
+    } catch (err) {
+      console.error('Error checking for existing attempts:', err);
+      // Start new attempt as fallback
+      await startQuizAttempt(quizId, quiz);
+    }
+  };
+
+  const startQuizAttempt = async (quizId, quizData) => {
     try {
       const response = await fetch('http://localhost:3000/api/quiz-stat', {
         method: 'POST',
@@ -78,7 +125,7 @@ export default function QuizTaking() {
         },
         body: JSON.stringify({
           quizId: quizId,
-          userId: 'current-user-123' // TODO: Get from auth context
+          userId: currentUser?._id || 'anonymous'
         }),
       });
       
@@ -88,6 +135,13 @@ export default function QuizTaking() {
       
       const data = await response.json();
       setQuizAttemptId(data._id);
+      
+      // Set timer if quiz has time limit
+      if (quizData.timeLimit) {
+        const timeInSeconds = quizData.timeLimit * 60; // Convert minutes to seconds
+        console.log('Setting timer:', quizData.timeLimit, 'minutes =', timeInSeconds, 'seconds');
+        setTimeRemaining(timeInSeconds);
+      }
     } catch (err) {
       console.error('Error starting quiz attempt:', err);
       // Continue without tracking for now
@@ -132,6 +186,39 @@ export default function QuizTaking() {
     
     // Submit answer to backend
     submitAnswer(questionId, answerIndex);
+  };
+
+  const saveProgress = async () => {
+    if (!quizAttemptId) return;
+    
+    try {
+      const response = await fetch(`http://localhost:3000/api/quiz-stat/${quizAttemptId}/save`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          currentQuestion: currentQuestion,
+          timeRemaining: timeRemaining
+        }),
+      });
+      
+      if (response.ok) {
+        setShowSaveNotification(true);
+        setTimeout(() => setShowSaveNotification(false), 3000); // Hide after 3 seconds
+      } else {
+        console.error('Failed to save progress');
+      }
+    } catch (err) {
+      console.error('Error saving progress:', err);
+    }
+  };
+
+  const handleBackToQuizList = async () => {
+    // Always save progress automatically before leaving
+    await saveProgress();
+    // Navigate immediately with save success state
+    navigate('/quiz-list', { state: { saveSuccess: true } });
   };
 
   const handleNextQuestion = () => {
@@ -218,6 +305,27 @@ export default function QuizTaking() {
     );
   }
 
+  if (!currentUser) {
+    return (
+      <div className="min-h-screen bg-amber-50 dark:bg-black pt-24 p-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center">
+            <div className="bg-red-100 dark:bg-red-900 border border-red-400 text-red-700 dark:text-red-200 px-4 py-3 rounded-lg">
+              <p className="font-semibold">Authentication Required</p>
+              <p className="text-sm mt-1">Please sign in to take quizzes</p>
+            </div>
+            <button 
+              onClick={() => navigate('/sign-in')}
+              className="mt-4 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
+            >
+              Sign In
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (error) {
     return (
       <div className="min-h-screen bg-amber-50 dark:bg-black pt-24 p-6">
@@ -256,21 +364,51 @@ export default function QuizTaking() {
 
   return (
     <div className="min-h-screen bg-amber-50 dark:bg-black pt-24 p-6">
+      {/* Save Notification Popup */}
+      {showSaveNotification && (
+        <div className="fixed top-20 right-6 z-50 transform transition-all duration-300 ease-in-out animate-pulse">
+          <div className="bg-green-50 dark:bg-green-900 border border-green-400 text-green-800 dark:text-green-200 px-4 py-3 rounded-lg shadow-lg flex items-center space-x-2">
+            <span className="text-green-600 dark:text-green-400">✓</span>
+            <span className="font-medium">Progress saved successfully!</span>
+          </div>
+        </div>
+      )}
+      
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="bg-amber-50 dark:bg-black border border-black dark:border-purple-500 rounded-lg p-6 mb-6">
           <div className="flex justify-between items-start mb-4">
-            <div>
+            <button
+              onClick={handleBackToQuizList}
+              className="px-4 py-2 bg-amber-50 dark:bg-black border border-black dark:border-purple-500 text-black dark:text-white hover:bg-amber-100 dark:hover:bg-gray-800 rounded-lg transition-colors text-sm font-medium flex items-center space-x-2"
+            >
+              <span>←</span>
+              <span>Save & Exit</span>
+            </button>
+            
+            <div className="flex-1 text-center">
               <h1 className="text-2xl font-bold text-black dark:text-white">{quiz.title}</h1>
               <p className="text-gray-600 dark:text-gray-400 mt-1">{quiz.description}</p>
+              {isResumed && (
+                <div className="mt-2 px-3 py-1 bg-green-100 dark:bg-green-900 border border-green-400 rounded-full inline-block">
+                  <span className="text-green-800 dark:text-green-200 text-sm font-medium">
+                    📍 Resumed from previous session
+                  </span>
+                </div>
+              )}
             </div>
-            {timeRemaining !== null && (
-              <div className={`px-4 py-2 rounded-lg font-semibold ${
-                timeRemaining < 300 ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
-              }`}>
-                Time: {formatTime(timeRemaining)}
-              </div>
-            )}
+            
+            <div className="flex flex-col items-end space-y-2">
+              {timeRemaining !== null && (
+                <div className={`px-4 py-2 rounded-lg font-semibold border ${
+                  timeRemaining < 300 
+                    ? 'bg-red-50 dark:bg-red-900 border-red-400 text-red-800 dark:text-red-200' 
+                    : 'bg-amber-50 dark:bg-black border-black dark:border-purple-500 text-black dark:text-white'
+                }`}>
+                  Time: {formatTime(timeRemaining)}
+                </div>
+              )}
+            </div>
           </div>
           
           {/* Progress Bar */}
