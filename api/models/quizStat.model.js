@@ -3,7 +3,7 @@ const { ObjectId } = mongoose.Schema.Types;
 
 const quizStatSchema = new mongoose.Schema({
     quizId: ObjectId,
-    userId: ObjectId,
+    userId: String,
     answers: [{
         questionId: ObjectId,
         chosenAnswer: Number,

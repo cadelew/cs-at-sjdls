@@ -1,6 +1,5 @@
 import Question from '../models/question.model.js';
 import { errorHandler } from '../utils/error.js';
-import mongoose from 'mongoose';
 
 export const getQuestions = async (req, res, next) => {
     const { id } = req.params;

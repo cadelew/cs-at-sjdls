@@ -71,9 +71,12 @@ export const getQuizStats = async (req, res, next) => {
 }
 
 export const getQuizStat = async (req, res, next) => {
-    const { attemptId } = req.params;
+    const { attemptid } = req.params;
     try {
-        const quizStat = await QuizStat.findById(attemptId);
+        const quizStat = await QuizStat.findById(attemptid);
+        if (!quizStat) {
+            return next(errorHandler(404, 'Quiz attempt not found'));
+        }
         res.status(200).json(quizStat);
     } catch (error) {
         next(error);
