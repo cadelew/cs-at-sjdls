@@ -140,6 +140,14 @@ export default function Header() {
                   </Link>
                 </li>
                 <li>
+                  <Link
+                    to='user-dashboard'
+                    className='block py-3 px-4 text-black dark:text-white border-b border-gray-200 dark:border-gray-700 md:hover:bg-transparent md:border-0 md:hover:text-purple-600 md:p-0 dark:hover:text-purple-400 hover:text-purple-600 md:dark:hover:bg-transparent transition-all duration-300 hover:transform hover:scale-105'
+                  >
+                    Dashboard
+                  </Link>
+                </li>
+                <li>
                   <button
                     onClick={toggleCsp}
                     id='mega-menu-dropdown-button'

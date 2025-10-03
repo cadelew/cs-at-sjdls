@@ -27,6 +27,13 @@ export default function QuizTaking() {
     }
   }, [id]);
 
+  // Re-fetch quiz data when user changes
+  useEffect(() => {
+    if (id && currentUser) {
+      fetchQuizData();
+    }
+  }, [currentUser]);
+
   // Handle page unload (tab close, navigation, refresh)
   useEffect(() => {
     const handleBeforeUnload = (e) => {
@@ -152,7 +159,7 @@ export default function QuizTaking() {
       setQuestions(questionsData);
       
       // Check for existing attempts first
-      await checkForExistingAttempt(quizData._id);
+      await checkForExistingAttempt(quizData._id, quizData);
       
       setError(null);
     } catch (err) {
@@ -162,9 +169,11 @@ export default function QuizTaking() {
     }
   };
 
-  const checkForExistingAttempt = async (quizId) => {
+  const checkForExistingAttempt = async (quizId, quizData) => {
     try {
       const userId = currentUser?._id || 'anonymous';
+      console.log('Checking for existing attempt:', { quizId, userId, currentUser: currentUser?.username });
+      
       const response = await fetch(`http://localhost:3000/api/quiz-stat/quiz/${quizId}/user/${userId}`);
       if (response.ok) {
         const attempts = await response.json();
@@ -193,21 +202,24 @@ export default function QuizTaking() {
           setAnswers(existingAnswers);
         } else {
           // Start new attempt
-          await startQuizAttempt(quizId, quiz);
+          await startQuizAttempt(quizId, quizData);
         }
       } else {
         // Start new attempt if no existing attempts
-        await startQuizAttempt(quizId, quiz);
+        await startQuizAttempt(quizId, quizData);
       }
     } catch (err) {
       console.error('Error checking for existing attempts:', err);
       // Start new attempt as fallback
-      await startQuizAttempt(quizId, quiz);
+      await startQuizAttempt(quizId, quizData);
     }
   };
 
   const startQuizAttempt = async (quizId, quizData) => {
     try {
+      const userId = currentUser?._id || 'anonymous';
+      console.log('Starting new quiz attempt:', { quizId, userId, currentUser: currentUser?.username });
+      
       const response = await fetch('http://localhost:3000/api/quiz-stat', {
         method: 'POST',
         headers: {
@@ -215,7 +227,7 @@ export default function QuizTaking() {
         },
         body: JSON.stringify({
           quizId: quizId,
-          userId: currentUser?._id || 'anonymous'
+          userId: userId
         }),
       });
       
@@ -227,7 +239,7 @@ export default function QuizTaking() {
       setQuizAttemptId(data._id);
       
       // Set timer if quiz has time limit
-      if (quizData.timeLimit) {
+      if (quizData && quizData.timeLimit) {
         const timeInSeconds = quizData.timeLimit * 60; // Convert minutes to seconds
         console.log('Setting timer:', quizData.timeLimit, 'minutes =', timeInSeconds, 'seconds');
         setTimeRemaining(timeInSeconds);
@@ -330,6 +342,13 @@ export default function QuizTaking() {
   const handleSubmitQuiz = async () => {
     if (submitting) return;
     
+    console.log('Submitting quiz:', { 
+      quizAttemptId, 
+      currentUser: currentUser?.username, 
+      userId: currentUser?._id,
+      answersCount: Object.keys(answers).length 
+    });
+    
     try {
       setSubmitting(true);
       setHasUnsavedProgress(false); // Clear unsaved progress flag
@@ -345,6 +364,7 @@ export default function QuizTaking() {
       
       // Submit quiz completion
       if (quizAttemptId) {
+        console.log('Submitting to endpoint:', `http://localhost:3000/api/quiz-stat/${quizAttemptId}/submit`);
         const response = await fetch(`http://localhost:3000/api/quiz-stat/${quizAttemptId}/submit`, {
           method: 'PUT',
           headers: {
@@ -352,7 +372,11 @@ export default function QuizTaking() {
           },
           body: JSON.stringify({
             score: score,
-            totalTimeTaken: totalTimeTaken
+            totalTimeTaken: totalTimeTaken,
+            totalQuestions: questions.length,
+            correctAnswers: correctAnswers,
+            incorrectAnswers: questions.length - correctAnswers,
+            skippedQuestions: questions.length - Object.keys(answers).length
           }),
         });
         

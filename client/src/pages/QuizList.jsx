@@ -139,6 +139,15 @@ export default function QuizList() {
           <p className="text-lg text-gray-600 dark:text-gray-400 mb-6">
             Test your knowledge with interactive quizzes covering all AP CSP topics
           </p>
+          
+          <div className="flex justify-center gap-4">
+            <Link
+              to="/user-dashboard"
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors text-sm"
+            >
+              📊 View Analytics
+            </Link>
+          </div>
         </div>
 
         {/* Sort Controls */}

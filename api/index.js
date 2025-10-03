@@ -6,6 +6,7 @@ import authRoutes from './routes/auth.route.js';
 import quizRoutes from './routes/quiz.route.js';
 import questionRoutes from './routes/question.route.js';
 import quizStatRoutes from './routes/quizStat.route.js';
+import analyticsRoutes from './routes/analytics.route.js';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 
@@ -59,6 +60,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/quiz', quizRoutes);
 app.use('/api/question', questionRoutes);
 app.use('/api/quiz-stat', quizStatRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 app.use((err, req, res, next) => {
     const statusCode = err.statusCode || 500;

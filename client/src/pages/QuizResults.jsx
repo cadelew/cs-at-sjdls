@@ -220,6 +220,13 @@ export default function QuizResults() {
           >
             Back to Quiz List
           </button>
+          
+          <button
+            onClick={() => navigate('/user-dashboard')}
+            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
+          >
+            📊 View Analytics
+          </button>
         </div>
 
         {/* Detailed Results */}

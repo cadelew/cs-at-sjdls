@@ -13,6 +13,7 @@ import Resources from './pages/Resources';
 import QuizList from './pages/QuizList';
 import QuizTaking from './pages/QuizTaking';
 import QuizResults from './pages/QuizResults';
+import UserDashboard from './pages/UserDashboard';
 import Header from './components/Header';
 import PrivateRoute from './components/PrivateRoute';
 import GettingStarted from './pages/GettingStarted';
@@ -43,6 +44,7 @@ export default function App() {
           <Route path='/quiz-list' element={<QuizList />} />
           <Route path='/quiz/:id' element={<QuizTaking />} />
           <Route path='/quiz/:id/results' element={<QuizResults />} />
+          <Route path='/user-dashboard' element={<UserDashboard />} />
         </Route>
         
         {/* Catch-all route - redirect any undefined paths to home */}

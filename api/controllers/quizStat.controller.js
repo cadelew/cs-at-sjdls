@@ -41,16 +41,36 @@ export const submitAnswerQuizStat = async (req, res, next) => {
 }
 
 export const submitQuizStat = async (req, res, next) => {
-    const { attemptId } = req.params;
-    const { score, totalTimeTaken } = req.body;
+    const { attemptid } = req.params;
+    const { score, totalTimeTaken, totalQuestions, correctAnswers, incorrectAnswers, skippedQuestions } = req.body;
+    
+    console.log('Backend submitQuizStat called:', { 
+        attemptid, 
+        score, 
+        totalTimeTaken,
+        totalQuestions,
+        correctAnswers,
+        incorrectAnswers,
+        skippedQuestions
+    });
+    
     try {
-        const quizStat = await QuizStat.findById(attemptId);
+        const quizStat = await QuizStat.findById(attemptid);
         if (!quizStat) {
+            console.log('Quiz attempt not found:', attemptid);
             return next(errorHandler(404, 'Quiz attempt not found'));
         }
+        
+        // Update all completion fields
         quizStat.score = score;
         quizStat.totalTimeTaken = totalTimeTaken;
+        quizStat.totalQuestions = totalQuestions || quizStat.totalQuestions;
+        quizStat.correctAnswers = correctAnswers || quizStat.correctAnswers;
+        quizStat.incorrectAnswers = incorrectAnswers || quizStat.incorrectAnswers;
+        quizStat.skippedQuestions = skippedQuestions || quizStat.skippedQuestions;
         quizStat.completedAt = new Date();
+        quizStat.isCompleted = true; // Mark as completed
+        
         await quizStat.save();
         res.status(200).json(quizStat);
     } catch (error) {
