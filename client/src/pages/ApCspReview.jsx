@@ -456,10 +456,16 @@ export default function ApCspReview() {
         </div>
 
         {/* Navigation */}
-        <div className="mt-8 text-center">
+        <div className="mt-8 text-center space-x-4">
+          <Link
+            to="/quiz-list"
+            className="inline-flex items-center px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition-colors"
+          >
+            🎯 Take Quizzes
+          </Link>
           <Link
             to="/checklist"
-            className="inline-flex items-center px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition-colors"
+            className="inline-flex items-center px-6 py-3 bg-amber-50 dark:bg-black border border-black dark:border-purple-500 text-black dark:text-white hover:bg-amber-100 dark:hover:bg-gray-800 font-semibold rounded-lg transition-colors"
           >
             📋 Go to AP CSP Checklist
           </Link>
