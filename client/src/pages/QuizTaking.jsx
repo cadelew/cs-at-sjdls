@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
@@ -547,9 +547,22 @@ export default function QuizTaking() {
 
         {/* Question */}
         <div className="bg-amber-50 dark:bg-black border border-black dark:border-purple-500 rounded-lg p-6 mb-6">
-          <h2 className="text-xl font-semibold text-black dark:text-white mb-6">
-            {currentQuestionData.questionsText}
-          </h2>
+          <div className="text-black dark:text-white mb-6">
+            {currentQuestionData.questionsText.includes('robot starts at position') || 
+             currentQuestionData.questionsText.includes('grid below') ||
+             currentQuestionData.questionsText.includes('facing >') ||
+             currentQuestionData.questionsText.includes('facing v') ||
+             currentQuestionData.questionsText.includes('facing ^') ||
+             currentQuestionData.questionsText.includes('facing <') ? (
+              <pre className="whitespace-pre-wrap font-mono text-sm bg-gray-100 dark:bg-gray-800 p-4 rounded-lg border border-gray-300 dark:border-gray-600">
+                {currentQuestionData.questionsText.replace(/\\n/g, '\n')}
+              </pre>
+            ) : (
+              <h2 className="text-xl font-semibold">
+                {currentQuestionData.questionsText}
+              </h2>
+            )}
+          </div>
           
           <div className="space-y-3">
             {currentQuestionData.options.map((option, index) => (
@@ -578,7 +591,15 @@ export default function QuizTaking() {
                     <div className="w-2 h-2 rounded-full bg-white"></div>
                   )}
                 </div>
-                <span className="text-black dark:text-white">{option}</span>
+                <span className="text-black dark:text-white">
+                  {option.includes('ROTATE') || option.includes('MOVE_FORWARD') || option.includes('REPEAT') ? (
+                    <pre className="whitespace-pre-wrap font-mono text-sm bg-gray-100 dark:bg-gray-800 p-2 rounded border border-gray-300 dark:border-gray-600">
+                      {option.replace(/\\n/g, '\n')}
+                    </pre>
+                  ) : (
+                    option.replace(/\\n/g, '\n')
+                  )}
+                </span>
               </label>
             ))}
           </div>

@@ -28,3 +28,24 @@ export const getQuiz = async (req, res, next) => {
         next(error);
     }
 }
+
+export const createQuiz = async (req, res, next) => {
+    try {
+        const { title, description, topic, difficulty, timeLimit, totalQuestions, isActive } = req.body;
+        
+        const newQuiz = new Quiz({
+            title,
+            description,
+            topic,
+            difficulty,
+            timeLimit,
+            totalQuestions,
+            isActive: isActive !== undefined ? isActive : true
+        });
+        
+        const savedQuiz = await newQuiz.save();
+        res.status(201).json(savedQuiz);
+    } catch (error) {
+        next(error);
+    }
+}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 
 export default function QuizResults() {
@@ -11,7 +11,7 @@ export default function QuizResults() {
   const [answers, setAnswers] = useState({});
   const [score, setScore] = useState(0);
   const [totalTimeTaken, setTotalTimeTaken] = useState(0);
-  const [quizAttemptId, setQuizAttemptId] = useState(null);
+  const [, setQuizAttemptId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showDetailedResults, setShowDetailedResults] = useState(false);
@@ -265,9 +265,20 @@ export default function QuizResults() {
                       </div>
                     </div>
                     
-                    <p className="text-black dark:text-white mb-4">
-                      {question.questionsText}
-                    </p>
+                    <div className="text-black dark:text-white mb-4">
+                      {question.questionsText.includes('robot starts at position') || 
+                       question.questionsText.includes('grid below') ||
+                       question.questionsText.includes('facing >') ||
+                       question.questionsText.includes('facing v') ||
+                       question.questionsText.includes('facing ^') ||
+                       question.questionsText.includes('facing <') ? (
+                        <pre className="whitespace-pre-wrap font-mono text-sm bg-gray-100 dark:bg-gray-800 p-4 rounded-lg border border-gray-300 dark:border-gray-600">
+                          {question.questionsText.replace(/\\n/g, '\n')}
+                        </pre>
+                      ) : (
+                        <p>{question.questionsText}</p>
+                      )}
+                    </div>
                     
                     <div className="space-y-2">
                       {question.options.map((option, optionIndex) => {
@@ -289,15 +300,21 @@ export default function QuizResults() {
                               {isUserAnswer && !isCorrectAnswer && (
                                 <span className="text-red-600 dark:text-red-400 mr-2">✗</span>
                               )}
-                              <span className={`${
-                                isCorrectAnswer 
-                                  ? 'text-green-800 dark:text-green-200 font-semibold'
-                                  : isUserAnswer && !isCorrectAnswer
-                                  ? 'text-red-800 dark:text-red-200 font-semibold'
-                                  : 'text-black dark:text-white'
-                              }`}>
-                                {option}
-                              </span>
+                                     <span className={`${
+                                       isCorrectAnswer 
+                                         ? 'text-green-800 dark:text-green-200 font-semibold'
+                                         : isUserAnswer && !isCorrectAnswer
+                                         ? 'text-red-800 dark:text-red-200 font-semibold'
+                                         : 'text-black dark:text-white'
+                                     }`}>
+                                       {option.includes('ROTATE') || option.includes('MOVE_FORWARD') || option.includes('REPEAT') ? (
+                                         <pre className="whitespace-pre-wrap font-mono text-sm bg-gray-100 dark:bg-gray-800 p-2 rounded border border-gray-300 dark:border-gray-600">
+                                           {option.replace(/\\n/g, '\n')}
+                                         </pre>
+                                       ) : (
+                                         option.replace(/\\n/g, '\n')
+                                       )}
+                                     </span>
                             </div>
                           </div>
                         );
