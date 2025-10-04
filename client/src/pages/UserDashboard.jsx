@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { PerformanceTrendsChart, TopicPerformanceChart, ScoreDistributionChart } from '../components/charts';
-import QuestionGenerationTest from '../components/ml/QuestionGenerationTest';
 
 export default function UserDashboard() {
   const { currentUser } = useSelector((state) => state.user);
@@ -168,16 +167,6 @@ export default function UserDashboard() {
             >
               Analytics
             </button>
-                   <button
-                     onClick={() => setActiveTab('ml')}
-                     className={`px-4 py-2 rounded-md transition-colors ${
-                       activeTab === 'ml'
-                         ? 'bg-purple-600 text-white'
-                         : 'text-black dark:text-white hover:bg-amber-100 dark:hover:bg-gray-800'
-                     }`}
-                   >
-                     AI Lab
-                   </button>
           </div>
         </div>
 
@@ -403,56 +392,6 @@ export default function UserDashboard() {
           </div>
         )}
 
-        {/* ML Lab Tab */}
-        {activeTab === 'ml' && (
-          <div className="space-y-6">
-            <div className="text-center mb-6">
-                     <h2 className="text-2xl font-bold text-black dark:text-white mb-2">
-                       🤖 AI Question Generation Lab
-                     </h2>
-                     <p className="text-gray-600 dark:text-gray-400">
-                       Generate questions using ChatGPT API with dual validation (Matrix simulation + GPT verification)
-                     </p>
-                     <div className="mt-2 p-3 bg-yellow-50 dark:bg-yellow-900 border border-yellow-400 rounded-lg">
-                       <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                         <strong>💡 Testing Mode:</strong> Start with small batches (1-5 questions) to test the system before generating larger amounts. Each question costs ~$0.001-0.003.
-                       </p>
-                     </div>
-            </div>
-
-                   <div className="grid grid-cols-1 gap-6">
-                     <QuestionGenerationTest />
-                   </div>
-
-            <div className="bg-amber-50 dark:bg-black border border-black dark:border-purple-500 rounded-lg p-6">
-                 <h3 className="text-xl font-semibold text-black dark:text-white mb-4">
-                   🎯 What You're Learning
-                 </h3>
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                   <div>
-                     <h4 className="font-semibold text-black dark:text-white mb-2">AI Integration Concepts</h4>
-                     <ul className="text-sm text-gray-700 dark:text-gray-300 space-y-1">
-                       <li>• OpenAI API integration</li>
-                       <li>• Prompt engineering</li>
-                       <li>• Response validation</li>
-                       <li>• Error handling</li>
-                       <li>• Batch processing</li>
-                     </ul>
-                   </div>
-                   <div>
-                     <h4 className="font-semibold text-black dark:text-white mb-2">Practical Applications</h4>
-                     <ul className="text-sm text-gray-700 dark:text-gray-300 space-y-1">
-                       <li>• Automated question generation</li>
-                       <li>• Content validation systems</li>
-                       <li>• Quality control mechanisms</li>
-                       <li>• Distribution algorithms</li>
-                       <li>• Scalable content creation</li>
-                     </ul>
-                   </div>
-                 </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
