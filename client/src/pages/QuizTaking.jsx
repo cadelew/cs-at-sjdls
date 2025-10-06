@@ -177,32 +177,36 @@ export default function QuizTaking() {
       const userId = currentUser?._id || 'anonymous';
       console.log('Checking for existing attempt:', { quizId, userId, currentUser: currentUser?.username });
       
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || '/api'}/quiz-stat/quiz/${quizId}/user/${userId}`, {
+      // Check if user has in-progress quizzes
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || '/api'}/quiz/in-progress/user`, {
         credentials: 'include'
       });
+      
       if (response.ok) {
-        const attempts = await response.json();
-        const incompleteAttempt = attempts.find(attempt => !attempt.isCompleted);
+        const inProgressQuizzes = await response.json();
+        const currentQuizProgress = inProgressQuizzes.find(q => q._id === quizId);
         
-        if (incompleteAttempt) {
+        if (currentQuizProgress && currentQuizProgress.progressInfo) {
           // Resume existing attempt
-          setCurrentQuestion(incompleteAttempt.currentQuestion || 0);
+          const progress = currentQuizProgress.progressInfo;
+          setCurrentQuestion(progress.currentQuestion || 0);
+          setIsResumed(true);
           
           // Set timer from saved time or quiz time limit
-          if (incompleteAttempt.timeRemaining !== null && incompleteAttempt.timeRemaining !== undefined) {
-            setTimeRemaining(incompleteAttempt.timeRemaining);
-          } else if (quiz.timeLimit) {
-            const timeInSeconds = quiz.timeLimit * 60;
+          if (progress.timeRemaining !== null && progress.timeRemaining !== undefined) {
+            setTimeRemaining(progress.timeRemaining);
+          } else if (quizData.timeLimit) {
+            const timeInSeconds = quizData.timeLimit * 60;
             setTimeRemaining(timeInSeconds);
           }
           
-          setIsResumed(true);
-          
           // Load existing answers
           const existingAnswers = {};
-          incompleteAttempt.answers.forEach(answer => {
-            existingAnswers[answer.questionId] = answer.chosenAnswer;
-          });
+          if (progress.answers) {
+            progress.answers.forEach(answer => {
+              existingAnswers[answer.questionId] = answer.chosenAnswer;
+            });
+          }
           setAnswers(existingAnswers);
         } else {
           // Start new attempt
@@ -232,6 +236,8 @@ export default function QuizTaking() {
       });
       
       if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Failed to start quiz:', errorData);
         throw new Error('Failed to start quiz');
       }
       
