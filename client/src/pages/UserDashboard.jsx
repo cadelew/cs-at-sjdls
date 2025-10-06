@@ -23,8 +23,8 @@ export default function UserDashboard() {
       
       // Fetch analytics and history in parallel
       const [analyticsResponse, historyResponse] = await Promise.all([
-        fetch(`http://localhost:3000/api/analytics/user/${currentUser._id}`),
-        fetch(`http://localhost:3000/api/analytics/user/${currentUser._id}/history?limit=10`)
+        fetch(`/api/analytics/user/${currentUser._id}`),
+        fetch(`/api/analytics/user/${currentUser._id}/history?limit=10`)
       ]);
 
       if (analyticsResponse.ok) {

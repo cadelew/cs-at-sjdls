@@ -522,3 +522,154 @@ export const cleanupExpiredQuizzes = async (req, res, next) => {
         next(error);
     }
 }
+
+// Start a quiz (mark as in-progress)
+export const startQuiz = async (req, res, next) => {
+    try {
+        const { quizId } = req.params;
+        const userId = req.user?.id;
+        
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: 'User authentication required'
+            });
+        }
+
+        const result = await quizLifecycleService.startQuiz(quizId, userId);
+
+        res.status(200).json(result);
+
+    } catch (error) {
+        console.error('Error in startQuiz:', error);
+        next(error);
+    }
+}
+
+// Resume a quiz (same as start, but clearer semantics)
+export const resumeQuiz = async (req, res, next) => {
+    try {
+        const { quizId } = req.params;
+        const userId = req.user?.id;
+        
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: 'User authentication required'
+            });
+        }
+
+        const result = await quizLifecycleService.startQuiz(quizId, userId);
+        
+        // Update the message to be more specific for resume
+        if (result.message === 'Resuming existing quiz') {
+            result.message = 'Quiz resumed successfully';
+        }
+
+        res.status(200).json(result);
+
+    } catch (error) {
+        console.error('Error in resumeQuiz:', error);
+        next(error);
+    }
+}
+
+// Update quiz progress
+export const updateQuizProgress = async (req, res, next) => {
+    try {
+        const { quizId } = req.params;
+        const userId = req.user?.id;
+        
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: 'User authentication required'
+            });
+        }
+
+        const {
+            currentQuestion,
+            answers = [],
+            timeRemaining
+        } = req.body;
+
+        const result = await quizLifecycleService.updateQuizProgress(quizId, userId, {
+            currentQuestion,
+            answers,
+            timeRemaining
+        });
+
+        res.status(200).json(result);
+
+    } catch (error) {
+        console.error('Error in updateQuizProgress:', error);
+        next(error);
+    }
+}
+
+// Get user's in-progress quizzes
+export const getUserInProgressQuizzes = async (req, res, next) => {
+    try {
+        const userId = req.user?.id;
+        
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: 'User authentication required'
+            });
+        }
+
+        const inProgressQuizzes = await quizLifecycleService.getUserInProgressQuizzes(userId);
+
+        res.status(200).json({
+            success: true,
+            quizzes: inProgressQuizzes,
+            count: inProgressQuizzes.length
+        });
+
+    } catch (error) {
+        console.error('Error in getUserInProgressQuizzes:', error);
+        next(error);
+    }
+}
+
+// Abandon a quiz
+export const abandonQuiz = async (req, res, next) => {
+    try {
+        const { quizId } = req.params;
+        const userId = req.user?.id;
+        
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: 'User authentication required'
+            });
+        }
+
+        const result = await quizLifecycleService.abandonQuiz(quizId, userId);
+
+        res.status(200).json(result);
+
+    } catch (error) {
+        console.error('Error in abandonQuiz:', error);
+        next(error);
+    }
+}
+
+// Get abandoned quizzes (admin endpoint)
+export const getAbandonedQuizzes = async (req, res, next) => {
+    try {
+        const abandonedQuizzes = await quizLifecycleService.getAbandonedQuizzes();
+
+        res.status(200).json({
+            success: true,
+            quizzes: abandonedQuizzes,
+            count: abandonedQuizzes.length,
+            message: 'Abandoned quizzes retrieved (manual cleanup required)'
+        });
+
+    } catch (error) {
+        console.error('Error in getAbandonedQuizzes:', error);
+        next(error);
+    }
+}

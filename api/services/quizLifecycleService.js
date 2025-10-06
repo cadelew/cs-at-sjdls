@@ -25,7 +25,7 @@ class QuizLifecycleService {
   async getActiveQuizzes(category, subcategory = 'general', userId = null) {
     try {
       const filter = {
-        status: 'active',
+        status: { $in: ['active', 'in-progress'] },
         category: category,
         subcategory: subcategory
       };
@@ -35,11 +35,60 @@ class QuizLifecycleService {
         filter['completedBy.userId'] = { $ne: userId }; // Exclude quizzes already completed by this user
       }
 
-      const activeQuizzes = await Quiz.find(filter)
-        .sort({ createdAt: -1 })
+      const quizzes = await Quiz.find(filter)
+        .sort({ 
+          status: 1, // in-progress first, then active
+          createdAt: -1 
+        })
         .limit(this.activeQuizLimits[category] || 3);
 
-      return activeQuizzes;
+      // Transform quizzes to include in-progress status for the user
+      const transformedQuizzes = quizzes.map(quiz => {
+        const userInProgress = quiz.inProgressBy.find(progress => 
+          progress.userId.toString() === userId?.toString()
+        );
+
+        // Calculate progress information
+        let progressInfo = null;
+        if (userInProgress) {
+          const progressPercentage = Math.round((userInProgress.currentQuestion / quiz.totalQuestions) * 100);
+          const timeSpent = Math.round((Date.now() - userInProgress.startedAt.getTime()) / 1000 / 60); // minutes
+          const timeRemaining = userInProgress.timeRemaining ? Math.round(userInProgress.timeRemaining / 60) : null; // minutes
+          
+          progressInfo = {
+            currentQuestion: userInProgress.currentQuestion,
+            totalQuestions: quiz.totalQuestions,
+            progressPercentage,
+            timeSpent,
+            timeRemaining,
+            startedAt: userInProgress.startedAt,
+            lastActivity: userInProgress.lastActivity,
+            answersCount: userInProgress.answers.length
+          };
+        }
+
+        return {
+          ...quiz.toObject(),
+          userInProgress: userInProgress || null,
+          isInProgress: !!userInProgress,
+          progressInfo,
+          statusDisplay: userInProgress ? 'in-progress' : quiz.status,
+          statusText: userInProgress ? 'In Progress' : 
+                     quiz.status === 'active' ? 'Available' : 
+                     quiz.status === 'completed' ? 'Completed' : 
+                     quiz.status === 'archived' ? 'Archived' : 'Unknown',
+          actionText: userInProgress ? 'Resume Quiz' : 
+                     quiz.status === 'active' ? 'Start Quiz' : 
+                     quiz.status === 'completed' ? 'View Results' : 
+                     quiz.status === 'archived' ? 'View Archived' : 'Unknown',
+          actionType: userInProgress ? 'resume' : 
+                     quiz.status === 'active' ? 'start' : 
+                     quiz.status === 'completed' ? 'view' : 
+                     quiz.status === 'archived' ? 'view' : 'unknown'
+        };
+      });
+
+      return transformedQuizzes;
     } catch (error) {
       console.error('Error getting active quizzes:', error);
       throw error;
@@ -269,6 +318,200 @@ class QuizLifecycleService {
     }
   }
 
+  // Start a quiz (mark as in-progress)
+  async startQuiz(quizId, userId) {
+    try {
+      const quiz = await Quiz.findById(quizId);
+      if (!quiz) {
+        throw new Error('Quiz not found');
+      }
+
+      if (quiz.status !== 'active') {
+        throw new Error('Quiz is not available');
+      }
+
+      // Check if user already started this quiz
+      const existingProgress = quiz.inProgressBy.find(progress => 
+        progress.userId.toString() === userId.toString()
+      );
+
+      if (existingProgress) {
+        // Update last activity
+        existingProgress.lastActivity = new Date();
+        await quiz.save();
+        return {
+          success: true,
+          message: 'Resuming existing quiz',
+          quiz: quiz,
+          progress: existingProgress
+        };
+      }
+
+      // Start new quiz session
+      const timeLimitSeconds = quiz.timeLimit ? quiz.timeLimit * 60 : null;
+      
+      quiz.inProgressBy.push({
+        userId: userId,
+        startedAt: new Date(),
+        currentQuestion: 0,
+        answers: [],
+        timeRemaining: timeLimitSeconds,
+        lastActivity: new Date()
+      });
+
+      // Change status to in-progress if this is the first user
+      if (quiz.status === 'active') {
+        quiz.status = 'in-progress';
+      }
+
+      await quiz.save();
+
+      const newProgress = quiz.inProgressBy[quiz.inProgressBy.length - 1];
+
+      return {
+        success: true,
+        message: 'Quiz started successfully',
+        quiz: quiz,
+        progress: newProgress
+      };
+
+    } catch (error) {
+      console.error('Error starting quiz:', error);
+      throw error;
+    }
+  }
+
+  // Update quiz progress
+  async updateQuizProgress(quizId, userId, progressData) {
+    try {
+      const {
+        currentQuestion,
+        answers = [],
+        timeRemaining
+      } = progressData;
+
+      const quiz = await Quiz.findById(quizId);
+      if (!quiz) {
+        throw new Error('Quiz not found');
+      }
+
+      const userProgress = quiz.inProgressBy.find(progress => 
+        progress.userId.toString() === userId.toString()
+      );
+
+      if (!userProgress) {
+        throw new Error('User has not started this quiz');
+      }
+
+      // Update progress
+      userProgress.currentQuestion = currentQuestion;
+      userProgress.answers = answers;
+      userProgress.timeRemaining = timeRemaining;
+      userProgress.lastActivity = new Date();
+
+      await quiz.save();
+
+      return {
+        success: true,
+        message: 'Quiz progress updated',
+        progress: userProgress
+      };
+
+    } catch (error) {
+      console.error('Error updating quiz progress:', error);
+      throw error;
+    }
+  }
+
+  // Get user's in-progress quizzes
+  async getUserInProgressQuizzes(userId) {
+    try {
+      const inProgressQuizzes = await Quiz.find({
+        'inProgressBy.userId': userId,
+        status: 'in-progress'
+      }).sort({ 'inProgressBy.lastActivity': -1 });
+
+      // Transform to include user-specific progress
+      const transformedQuizzes = inProgressQuizzes.map(quiz => {
+        const userProgress = quiz.inProgressBy.find(progress => 
+          progress.userId.toString() === userId.toString()
+        );
+
+        return {
+          ...quiz.toObject(),
+          userProgress: userProgress,
+          progressPercentage: Math.round((userProgress.currentQuestion / quiz.totalQuestions) * 100),
+          timeSpent: Math.round((Date.now() - userProgress.startedAt.getTime()) / 1000 / 60), // minutes
+          canResume: true,
+          actionText: 'Resume Quiz',
+          actionType: 'resume',
+          statusText: 'In Progress',
+          statusDisplay: 'in-progress'
+        };
+      });
+
+      return transformedQuizzes;
+    } catch (error) {
+      console.error('Error getting user in-progress quizzes:', error);
+      throw error;
+    }
+  }
+
+  // Abandon a quiz (remove from in-progress)
+  async abandonQuiz(quizId, userId) {
+    try {
+      const quiz = await Quiz.findById(quizId);
+      if (!quiz) {
+        throw new Error('Quiz not found');
+      }
+
+      const userProgressIndex = quiz.inProgressBy.findIndex(progress => 
+        progress.userId.toString() === userId.toString()
+      );
+
+      if (userProgressIndex === -1) {
+        throw new Error('User has not started this quiz');
+      }
+
+      // Remove user's progress
+      quiz.inProgressBy.splice(userProgressIndex, 1);
+
+      // If no one else is taking this quiz, change status back to active
+      if (quiz.inProgressBy.length === 0) {
+        quiz.status = 'active';
+      }
+
+      await quiz.save();
+
+      return {
+        success: true,
+        message: 'Quiz abandoned successfully'
+      };
+
+    } catch (error) {
+      console.error('Error abandoning quiz:', error);
+      throw error;
+    }
+  }
+
+  // Get abandoned quizzes (for manual cleanup if needed)
+  async getAbandonedQuizzes() {
+    try {
+      const abandonDate = new Date();
+      abandonDate.setHours(abandonDate.getHours() - 24);
+
+      const abandonedQuizzes = await Quiz.find({
+        status: 'in-progress',
+        'inProgressBy.lastActivity': { $lt: abandonDate }
+      });
+
+      return abandonedQuizzes;
+    } catch (error) {
+      console.error('Error getting abandoned quizzes:', error);
+      throw error;
+    }
+  }
+
   // Get quiz statistics
   async getQuizStats() {
     try {
@@ -283,14 +526,16 @@ class QuizLifecycleService {
       ]);
 
       const activeQuizzes = await Quiz.countDocuments({ status: 'active' });
+      const inProgressQuizzes = await Quiz.countDocuments({ status: 'in-progress' });
       const completedQuizzes = await Quiz.countDocuments({ status: 'completed' });
       const archivedQuizzes = await Quiz.countDocuments({ status: 'archived' });
 
       return {
         active: activeQuizzes,
+        inProgress: inProgressQuizzes,
         completed: completedQuizzes,
         archived: archivedQuizzes,
-        total: activeQuizzes + completedQuizzes + archivedQuizzes,
+        total: activeQuizzes + inProgressQuizzes + completedQuizzes + archivedQuizzes,
         breakdown: stats
       };
 

@@ -28,30 +28,52 @@ export default function QuizList() {
   const fetchQuizzes = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:3000/api/quiz?sortBy=${sortBy}&order=${order}`);
       
-      if (!response.ok) {
-        throw new Error('Failed to fetch quizzes');
-      }
+      // Fetch active quizzes from different categories
+      const categories = ['practice', 'exam', 'topic-specific', 'mixed'];
+      const allQuizzes = [];
       
-      const data = await response.json();
-      setQuizzes(data);
-      
-      // Fetch question counts for each quiz
-      const counts = {};
-      for (const quiz of data) {
+      for (const category of categories) {
         try {
-          const questionsResponse = await fetch(`http://localhost:3000/api/question/${quiz._id}/questions`);
-          if (questionsResponse.ok) {
-            const questions = await questionsResponse.json();
-            counts[quiz._id] = questions.length;
-          } else {
-            counts[quiz._id] = quiz.totalQuestions || 0;
+          const response = await fetch(`/api/quiz/active/${category}/general`, {
+            credentials: 'include'
+          });
+          if (response.ok) {
+            const data = await response.json();
+            if (data.quizzes) {
+              allQuizzes.push(...data.quizzes);
+            }
           }
         } catch (err) {
-          counts[quiz._id] = quiz.totalQuestions || 0;
+          console.warn(`Failed to fetch ${category} quizzes:`, err);
         }
       }
+      
+      // Sort quizzes based on user preference
+      const sortedQuizzes = allQuizzes.sort((a, b) => {
+        let aValue = a[sortBy];
+        let bValue = b[sortBy];
+        
+        // Handle special cases
+        if (sortBy === 'title') {
+          aValue = a.title?.toLowerCase() || '';
+          bValue = b.title?.toLowerCase() || '';
+        }
+        
+        if (order === 'asc') {
+          return aValue > bValue ? 1 : -1;
+        } else {
+          return aValue < bValue ? 1 : -1;
+        }
+      });
+      
+      setQuizzes(sortedQuizzes);
+      
+      // Set question counts (already available in quiz data)
+      const counts = {};
+      sortedQuizzes.forEach(quiz => {
+        counts[quiz._id] = quiz.totalQuestions || 0;
+      });
       setQuestionCounts(counts);
       setError(null);
     } catch (err) {
@@ -192,23 +214,62 @@ export default function QuizList() {
         {/* Quiz Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {quizzes.map((quiz) => (
-            <div key={quiz._id} className="bg-amber-50 dark:bg-black border border-black dark:border-purple-500 rounded-lg p-6 hover:shadow-lg transition-shadow">
+            <div key={quiz._id} className={`bg-amber-50 dark:bg-black border rounded-lg p-6 hover:shadow-lg transition-shadow ${
+              quiz.isInProgress 
+                ? 'border-orange-500 dark:border-orange-400 bg-orange-50 dark:bg-orange-900' 
+                : 'border-black dark:border-purple-500'
+            }`}>
               <div className="flex items-start justify-between mb-4">
                 <h3 className="text-xl font-semibold text-black dark:text-white flex-1">
                   {quiz.title}
                 </h3>
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${getDifficultyColor(quiz.difficulty)}`}>
-                  {quiz.difficulty || 'Unknown'}
-                </span>
+                <div className="flex flex-col items-end space-y-1">
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getDifficultyColor(quiz.difficulty)}`}>
+                    {quiz.difficulty || 'Unknown'}
+                  </span>
+                  {quiz.isInProgress && (
+                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200">
+                      In Progress
+                    </span>
+                  )}
+                </div>
               </div>
               
               <p className="text-gray-600 dark:text-gray-400 mb-4 text-sm">
                 {quiz.description || 'No description available'}
               </p>
               
+              {/* Progress Information for In-Progress Quizzes */}
+              {quiz.isInProgress && quiz.progressInfo && (
+                <div className="mb-4 p-3 bg-orange-100 dark:bg-orange-800 rounded-lg">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm font-medium text-orange-800 dark:text-orange-200">
+                      Progress: {quiz.progressInfo.progressPercentage}%
+                    </span>
+                    <span className="text-sm text-orange-700 dark:text-orange-300">
+                      {quiz.progressInfo.currentQuestion}/{quiz.progressInfo.totalQuestions} questions
+                    </span>
+                  </div>
+                  <div className="w-full bg-orange-200 dark:bg-orange-700 rounded-full h-2">
+                    <div 
+                      className="bg-orange-500 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${quiz.progressInfo.progressPercentage}%` }}
+                    ></div>
+                  </div>
+                  {quiz.progressInfo.timeRemaining && (
+                    <div className="mt-2 text-xs text-orange-700 dark:text-orange-300">
+                      Time remaining: {quiz.progressInfo.timeRemaining} minutes
+                    </div>
+                  )}
+                </div>
+              )}
+              
               <div className="flex flex-wrap gap-2 mb-4">
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${getTopicColor(quiz.topic)}`}>
                   {quiz.topic || 'General'}
+                </span>
+                <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                  {quiz.category || 'practice'}
                 </span>
               </div>
               
@@ -230,9 +291,13 @@ export default function QuizList() {
               <div className="text-center">
                 <Link
                   to={`/quiz/${quiz._id}`}
-                  className="inline-block w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors text-center"
+                  className={`inline-block w-full font-semibold py-3 px-4 rounded-lg transition-colors text-center ${
+                    quiz.isInProgress
+                      ? 'bg-orange-600 hover:bg-orange-700 text-white'
+                      : 'bg-purple-600 hover:bg-purple-700 text-white'
+                  }`}
                 >
-                  Start Quiz
+                  {quiz.actionText || (quiz.isInProgress ? 'Resume Quiz' : 'Start Quiz')}
                 </Link>
               </div>
             </div>

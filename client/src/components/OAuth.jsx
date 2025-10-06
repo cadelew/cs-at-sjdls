@@ -9,10 +9,15 @@ export default function OAuth() {
   const navigate = useNavigate();
   const handleGoogleClick = async () => {
     try {
+      if (!auth) {
+        throw new Error('Firebase authentication is not available');
+      }
+      
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'}/api/auth/google`, {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || '/api'}/auth/google`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -28,6 +33,7 @@ export default function OAuth() {
       navigate('/dashboard');
     } catch (error) {
       console.log('could not login with google', error);
+      alert('Google authentication is currently unavailable. Please use email/password sign-in instead.');
     }
   };
   return (

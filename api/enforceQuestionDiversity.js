@@ -1,26 +1,13 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import Question from './models/question.model.js';
-import OpenAI from 'openai';
+import QuestionGenerationService from './services/questionGenerationService.js';
 
 dotenv.config({ path: './.env' });
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGO).then(() => {
-    console.log("Connected to MongoDB");
-}).catch((err) => {
-    console.log(err);
-});
-
-// Initialize OpenAI
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY
-});
-
-// Diversity enforcement system
 class DiversityEnforcer {
     constructor() {
-        this.forbiddenNumbers = new Set(['1', '0', '5', '2', '3', '4']); // Most overused
+        this.commonNumbers = new Set(['1', '0', '5', '2', '3', '4']); // Less common numbers
         this.forbiddenFunctions = new Set(['calculate_sum', 'sum_numbers', 'find_sum', 'add_numbers']);
         this.forbiddenPatterns = [
             'sum of first n numbers',
@@ -30,7 +17,7 @@ class DiversityEnforcer {
             'function that calculates'
         ];
         
-        this.requiredNumbers = ['7', '12', '18', '25', '35', '42', '75', '150', '200', '300'];
+        this.preferredNumbers = ['7', '12', '18', '25', '35', '42', '75', '150', '200', '300']; // Changed from requiredNumbers
         this.requiredFunctions = [
             'analyze_data', 'process_items', 'compute_result', 'find_solution', 
             'sort_elements', 'search_items', 'filter_data', 'transform_values',
@@ -38,29 +25,34 @@ class DiversityEnforcer {
         ];
     }
     
-    // Check if question violates diversity rules
+    // Check if question uses too many common numbers
     checkDiversityViolations(questionText) {
         const violations = [];
         const text = questionText.toLowerCase();
         
-        // Check forbidden numbers
-        for (const num of this.forbiddenNumbers) {
-            if (text.includes(` ${num} `) || text.includes(` ${num},`) || text.includes(` ${num}.`)) {
-                violations.push(`Uses forbidden number: ${num}`);
-            }
+        // Count common numbers usage
+        let commonNumberCount = 0;
+        for (const num of this.commonNumbers) {
+            const matches = (text.match(new RegExp(`\\b${num}\\b`, 'g')) || []).length;
+            commonNumberCount += matches;
         }
         
-        // Check forbidden functions
+        // If more than 2 common numbers, suggest improvement
+        if (commonNumberCount > 2) {
+            violations.push(`Uses too many common numbers (${commonNumberCount}): prefer ${this.preferredNumbers.join(', ')}`);
+        }
+        
+        // Check for forbidden functions
         for (const func of this.forbiddenFunctions) {
             if (text.includes(func)) {
                 violations.push(`Uses forbidden function: ${func}`);
             }
         }
         
-        // Check forbidden patterns
+        // Check for forbidden patterns
         for (const pattern of this.forbiddenPatterns) {
             if (text.includes(pattern)) {
-                violations.push(`Contains forbidden pattern: "${pattern}"`);
+                violations.push(`Contains forbidden pattern: ${pattern}`);
             }
         }
         
@@ -69,26 +61,29 @@ class DiversityEnforcer {
     
     // Generate a diverse question with strict constraints
     async generateDiverseQuestion(questionType, bigIdea, difficulty) {
-        const maxAttempts = 5;
+        const maxAttempts = 3; // Changed from 5
         
         for (let attempt = 1; attempt <= maxAttempts; attempt++) {
             console.log(`Attempt ${attempt}/${maxAttempts} for ${questionType} question...`);
             
-            // Pick random required elements
-            const randomNumber = this.requiredNumbers[Math.floor(Math.random() * this.requiredNumbers.length)];
+            // Pick random preferred elements
+            const randomNumber = this.preferredNumbers[Math.floor(Math.random() * this.preferredNumbers.length)]; // Changed from requiredNumbers
             const randomFunction = this.requiredFunctions[Math.floor(Math.random() * this.requiredFunctions.length)];
             
             const prompt = `
-            Generate a ${questionType} question with STRICT REQUIREMENTS:
+            Generate a ${questionType} question with DIVERSITY REQUIREMENTS: // Updated prompt
             
-            MANDATORY ELEMENTS (NO EXCEPTIONS):
+            PREFERRED ELEMENTS (USE THESE): // Updated prompt
             - Use the number ${randomNumber} in your question
             - Use function name: ${randomFunction}
             - Big Idea: ${bigIdea}
             - Difficulty: ${difficulty}
             
-            FORBIDDEN ELEMENTS (DO NOT USE):
-            - Numbers: 1, 0, 5, 2, 3, 4
+            AVOID OVERUSING COMMON NUMBERS: // Updated prompt
+            - Minimize use of: 1, 0, 5, 2, 3, 4
+            - Prefer: ${this.preferredNumbers.join(', ')}
+            
+            AVOID THESE PATTERNS:
             - Functions: calculate_sum, sum_numbers, find_sum, add_numbers
             - Patterns: "sum of first n", "two sum problem", "unsorted array and target sum"
             
@@ -103,180 +98,105 @@ class DiversityEnforcer {
                 "questionsText": "Your unique question here",
                 "options": ["Option 1", "Option 2", "Option 3", "Option 4"],
                 "correctAnswer": 0,
-                "explanation": "Detailed explanation",
-                "topic": "specific topic",
-                "bigIdea": ${bigIdea},
+                "explanation": "Explanation here",
+                "bigIdea": "${bigIdea}",
                 "questionType": "${questionType}",
                 "difficulty": "${difficulty}",
-                "points": 5,
-                "tags": ["unique", "diverse", "real-world"]
+                "tags": ["tag1", "tag2"]
             }
             `;
             
             try {
-                const response = await openai.chat.completions.create({
-                    model: "gpt-4o-mini",
-                    messages: [{ role: "user", content: prompt }],
-                    temperature: 0.8, // Higher temperature for more creativity
-                    max_tokens: 1000
-                });
+                const generationService = new QuestionGenerationService();
+                const result = await generationService.generateSingleQuestion(questionType, bigIdea, difficulty, prompt);
                 
-                const generatedContent = response.choices[0].message.content;
-                const jsonMatch = generatedContent.match(/\{[\s\S]*\}/);
-                
-                if (!jsonMatch) {
-                    console.log(`No valid JSON in attempt ${attempt}`);
-                    continue;
-                }
-                
-                const question = JSON.parse(jsonMatch[0]);
-                
-                // Check for diversity violations
-                const violations = this.checkDiversityViolations(question.questionsText);
-                
-                if (violations.length === 0) {
-                    console.log(`✅ Generated diverse ${questionType} question on attempt ${attempt}`);
-                    return question;
-                } else {
-                    console.log(`❌ Diversity violations in attempt ${attempt}:`, violations);
-                    if (attempt === maxAttempts) {
-                        console.log(`⚠️ Using question despite violations (max attempts reached)`);
-                        return question;
+                if (result && result.questionsText) {
+                    const violations = this.checkDiversityViolations(result.questionsText);
+                    
+                    if (violations.length === 0) {
+                        console.log(`✅ Generated diverse ${questionType} question (attempt ${attempt})`);
+                        return result;
+                    } else {
+                        console.log(`❌ Diversity violations (attempt ${attempt}):`, violations);
                     }
                 }
-                
             } catch (error) {
-                console.error(`Error in attempt ${attempt}:`, error);
-                if (attempt === maxAttempts) throw error;
+                console.log(`❌ Generation failed (attempt ${attempt}):`, error.message);
             }
         }
         
-        throw new Error(`Failed to generate diverse ${questionType} question after ${maxAttempts} attempts`);
+        console.log(`❌ Failed to generate diverse ${questionType} question after ${maxAttempts} attempts`);
+        return null;
     }
 }
 
 async function enforceDiversity() {
-    console.log('🎯 Enforcing Question Diversity with Strict Rules...\n');
-    
-    const diversityEnforcer = new DiversityEnforcer();
-    
     try {
+        console.log('🚀 Starting Question Diversity Enforcement...\n');
+        
+        await mongoose.connect(process.env.MONGO);
+        console.log('✅ Connected to MongoDB\n');
+        
         // Remove all existing questions to start fresh
-        console.log('🗑️ Removing all existing questions for fresh start...');
-        await Question.deleteMany({});
-        console.log('✅ All questions removed');
+        console.log('📝 Adding more questions to existing question bank...'); // Changed log message
+        const existingCount = await Question.countDocuments();
+        console.log(`✅ Current questions: ${existingCount}`);
         
         // Generate diverse questions with strict enforcement
-        const questionsToGenerate = 50; // Start with smaller batch
+        const questionsToGenerate = 122; // Changed from 50 to 122
+        
         const questionTypes = ['code_analysis', 'algorithm', 'data_structure', 'problem_solving'];
-        const bigIdeas = [1, 2, 3, 4, 5];
+        const bigIdeas = ['1', '2', '3', '4', '5'];
         const difficulties = ['easy', 'medium', 'hard'];
         
-        const generatedQuestions = [];
+        const diversityEnforcer = new DiversityEnforcer();
+        let generatedCount = 0;
+        let failedCount = 0;
+        
+        console.log(`\n🎯 Generating ${questionsToGenerate} diverse questions...\n`);
         
         for (let i = 0; i < questionsToGenerate; i++) {
             const questionType = questionTypes[Math.floor(Math.random() * questionTypes.length)];
             const bigIdea = bigIdeas[Math.floor(Math.random() * bigIdeas.length)];
             const difficulty = difficulties[Math.floor(Math.random() * difficulties.length)];
             
-            console.log(`\n📝 Generating question ${i + 1}/${questionsToGenerate}: ${questionType} (Big Idea ${bigIdea}, ${difficulty})`);
+            console.log(`\n📝 Question ${i + 1}/${questionsToGenerate}: ${questionType} (${bigIdea}, ${difficulty})`);
             
-            try {
-                const question = await diversityEnforcer.generateDiverseQuestion(questionType, bigIdea, difficulty);
-                
-                // Save to database
-                const newQuestion = new Question({
-                    questionsText: question.questionsText,
-                    options: question.options,
-                    correctAnswer: question.correctAnswer,
-                    explanation: question.explanation,
-                    topic: question.topic,
-                    bigIdea: question.bigIdea,
-                    questionType: question.questionType,
-                    difficulty: question.difficulty,
-                    points: question.points,
-                    tags: question.tags,
-                    metadata: {
-                        generatedBy: 'AI-diverse',
-                        validationScore: 1.0,
-                        usageCount: 0,
-                        averageScore: 0,
-                        isActive: true
-                    }
-                });
-                
-                const savedQuestion = await newQuestion.save();
-                generatedQuestions.push(savedQuestion);
-                
-                console.log(`✅ Saved question: ${savedQuestion._id}`);
-                
-            } catch (error) {
-                console.error(`❌ Failed to generate question ${i + 1}:`, error);
-                // Continue with other questions
+            const question = await diversityEnforcer.generateDiverseQuestion(questionType, bigIdea, difficulty);
+            
+            if (question) {
+                try {
+                    const savedQuestion = await Question.create(question);
+                    generatedCount++;
+                    console.log(`✅ Saved question: ${savedQuestion._id}`);
+                } catch (saveError) {
+                    console.log(`❌ Failed to save question:`, saveError.message);
+                    failedCount++;
+                }
+            } else {
+                failedCount++;
             }
+            
+            // Add small delay to avoid rate limiting
+            await new Promise(resolve => setTimeout(resolve, 1000));
         }
         
-        console.log(`\n🎉 Generated ${generatedQuestions.length} diverse questions`);
+        const finalCount = await Question.countDocuments();
         
-        // Analyze final diversity
-        const finalQuestions = await Question.find({ 'metadata.isActive': true });
-        console.log(`\n📊 Final Analysis:`);
-        console.log(`Total questions: ${finalQuestions.length}`);
-        
-        const numberCounts = {};
-        const functionCounts = {};
-        const typeCounts = {};
-        
-        finalQuestions.forEach(q => {
-            // Count numbers
-            const numbers = q.questionsText.match(/\b\d+\b/g);
-            if (numbers) {
-                numbers.forEach(num => {
-                    numberCounts[num] = (numberCounts[num] || 0) + 1;
-                });
-            }
-            
-            // Count functions
-            const functions = q.questionsText.match(/def\s+(\w+)|function\s+(\w+)/g);
-            if (functions) {
-                functions.forEach(func => {
-                    functionCounts[func] = (functionCounts[func] || 0) + 1;
-                });
-            }
-            
-            // Count types
-            typeCounts[q.questionType] = (typeCounts[q.questionType] || 0) + 1;
-        });
-        
-        console.log('\n🔢 Number Distribution:');
-        Object.entries(numberCounts)
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 10)
-            .forEach(([num, count]) => {
-                console.log(`  ${num}: ${count} questions`);
-            });
-        
-        console.log('\n🔧 Function Distribution:');
-        Object.entries(functionCounts)
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 10)
-            .forEach(([func, count]) => {
-                console.log(`  ${func}: ${count} questions`);
-            });
-        
-        console.log('\n📋 Question Type Distribution:');
-        Object.entries(typeCounts).forEach(([type, count]) => {
-            console.log(`  ${type}: ${count} questions`);
-        });
+        console.log(`\n🎉 Diversity enforcement complete!`);
+        console.log(`📊 Results:`);
+        console.log(`  - Questions generated: ${generatedCount}`);
+        console.log(`  - Questions failed: ${failedCount}`);
+        console.log(`  - Total questions in DB: ${finalCount}`);
+        console.log(`  - Success rate: ${Math.round((generatedCount / questionsToGenerate) * 100)}%`);
         
     } catch (error) {
-        console.error('❌ Error enforcing diversity:', error);
+        console.error('❌ Error during diversity enforcement:', error);
     } finally {
-        mongoose.connection.close();
-        console.log('\n🔌 Database connection closed.');
+        await mongoose.disconnect();
+        console.log('\n🔌 Disconnected from MongoDB');
     }
 }
 
 // Run the diversity enforcement
 enforceDiversity();
-

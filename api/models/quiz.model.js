@@ -26,7 +26,7 @@ const quizSchema = new mongoose.Schema({
     tags: [String], // Additional tags for filtering
     status: {
         type: String,
-        enum: ['active', 'completed', 'archived'],
+        enum: ['active', 'in-progress', 'completed', 'archived'],
         default: 'active'
     },
     completedBy: [{
@@ -40,6 +40,18 @@ const quizSchema = new mongoose.Schema({
             isCorrect: Boolean,
             timeSpent: Number // seconds per question
         }]
+    }],
+    inProgressBy: [{
+        userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        startedAt: { type: Date, default: Date.now },
+        currentQuestion: { type: Number, default: 0 },
+        answers: [{
+            questionId: mongoose.Schema.Types.ObjectId,
+            selectedAnswer: Number,
+            timeSpent: Number // seconds per question
+        }],
+        timeRemaining: Number, // seconds remaining
+        lastActivity: { type: Date, default: Date.now }
     }],
     expiresAt: { type: Date, default: () => new Date(Date.now() + 90 * 24 * 60 * 60 * 1000) }, // 90 days from creation
     metadata: {

@@ -10,7 +10,7 @@ import { getStorage } from "firebase/storage";
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "dummy-key",
   authDomain: "cs-at-sjdls.firebaseapp.com",
   projectId: "cs-at-sjdls",
   storageBucket: "cs-at-sjdls.appspot.com",
@@ -19,11 +19,18 @@ const firebaseConfig = {
   measurementId: "G-05V9JTG98G"
 };
 
-// Initialize Firebase
-export const app = initializeApp(firebaseConfig);
+// Initialize Firebase only if API key is valid
+let app, auth, storage;
+try {
+  app = initializeApp(firebaseConfig);
+  auth = getAuth(app);
+  storage = getStorage(app);
+} catch (error) {
+  console.warn('Firebase initialization failed:', error.message);
+  // Create dummy objects to prevent crashes
+  app = null;
+  auth = null;
+  storage = null;
+}
 
-// Initialize Firebase Auth
-export const auth = getAuth(app);
-
-// Initialize Firebase Storage
-export const storage = getStorage(app);
+export { app, auth, storage };

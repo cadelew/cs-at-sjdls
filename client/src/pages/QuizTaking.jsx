@@ -12,7 +12,6 @@ export default function QuizTaking() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState({});
   const [timeRemaining, setTimeRemaining] = useState(null);
-  const [quizAttemptId, setQuizAttemptId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
@@ -143,7 +142,9 @@ export default function QuizTaking() {
       setLoading(true);
       
       // Fetch quiz details
-      const quizResponse = await fetch(`http://localhost:3000/api/quiz/${id}`);
+      const quizResponse = await fetch(`/api/quiz/${id}`, {
+        credentials: 'include'
+      });
       if (!quizResponse.ok) {
         throw new Error('Failed to fetch quiz');
       }
@@ -151,7 +152,9 @@ export default function QuizTaking() {
       setQuiz(quizData);
       
       // Fetch questions
-      const questionsResponse = await fetch(`http://localhost:3000/api/question/${id}/questions`);
+      const questionsResponse = await fetch(`/api/question/${id}/questions`, {
+        credentials: 'include'
+      });
       if (!questionsResponse.ok) {
         throw new Error('Failed to fetch questions');
       }
@@ -174,14 +177,15 @@ export default function QuizTaking() {
       const userId = currentUser?._id || 'anonymous';
       console.log('Checking for existing attempt:', { quizId, userId, currentUser: currentUser?.username });
       
-      const response = await fetch(`http://localhost:3000/api/quiz-stat/quiz/${quizId}/user/${userId}`);
+      const response = await fetch(`/api/quiz-stat/quiz/${quizId}/user/${userId}`, {
+        credentials: 'include'
+      });
       if (response.ok) {
         const attempts = await response.json();
         const incompleteAttempt = attempts.find(attempt => !attempt.isCompleted);
         
         if (incompleteAttempt) {
           // Resume existing attempt
-          setQuizAttemptId(incompleteAttempt._id);
           setCurrentQuestion(incompleteAttempt.currentQuestion || 0);
           
           // Set timer from saved time or quiz time limit
@@ -217,26 +221,22 @@ export default function QuizTaking() {
 
   const startQuizAttempt = async (quizId, quizData) => {
     try {
-      const userId = currentUser?._id || 'anonymous';
-      console.log('Starting new quiz attempt:', { quizId, userId, currentUser: currentUser?.username });
+      console.log('Starting quiz:', { quizId, currentUser: currentUser?.username });
       
-      const response = await fetch('http://localhost:3000/api/quiz-stat', {
+      const response = await fetch(`/api/quiz/${quizId}/start`, {
+        credentials: 'include',
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          quizId: quizId,
-          userId: userId
-        }),
       });
       
       if (!response.ok) {
-        throw new Error('Failed to start quiz attempt');
+        throw new Error('Failed to start quiz');
       }
       
       const data = await response.json();
-      setQuizAttemptId(data._id);
+      console.log('Quiz started:', data);
       
       // Set timer if quiz has time limit
       if (quizData && quizData.timeLimit) {
@@ -251,29 +251,17 @@ export default function QuizTaking() {
   };
 
   const submitAnswer = async (questionId, chosenAnswer) => {
-    if (!quizAttemptId) return;
+    if (!quiz) return;
     
     try {
-      const response = await fetch(`http://localhost:3000/api/quiz-stat/${quizAttemptId}/answer`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          answer: {
-            questionId: questionId,
-            chosenAnswer: chosenAnswer,
-            isCorrect: false, // Will be calculated on backend
-            isSkipped: false,
-            timeTaken: 0, // TODO: Track time per question
-            date: new Date().toISOString()
-          }
-        }),
-      });
+      // Update local state immediately for better UX
+      setAnswers(prev => ({
+        ...prev,
+        [questionId]: chosenAnswer
+      }));
       
-      if (!response.ok) {
-        console.error('Failed to submit answer');
-      }
+      // Save progress to backend
+      await saveProgress();
     } catch (err) {
       console.error('Error submitting answer:', err);
     }
@@ -291,19 +279,21 @@ export default function QuizTaking() {
   };
 
   const saveProgress = async () => {
-    if (!quizAttemptId) return;
+    if (!quiz) return;
     
     // Get the current timer value using ref to avoid stale closure
     const currentTimeRemaining = timeRemainingRef.current;
     
     try {
-      const response = await fetch(`http://localhost:3000/api/quiz-stat/${quizAttemptId}/save`, {
+      const response = await fetch(`/api/quiz/${quiz._id}/progress`, {
+        credentials: 'include',
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           currentQuestion: currentQuestion,
+          answers: answers,
           timeRemaining: currentTimeRemaining
         }),
       });
@@ -343,7 +333,7 @@ export default function QuizTaking() {
     if (submitting) return;
     
     console.log('Submitting quiz:', { 
-      quizAttemptId, 
+      quizId: quiz?._id, 
       currentUser: currentUser?.username, 
       userId: currentUser?._id,
       answersCount: Object.keys(answers).length 
@@ -363,20 +353,22 @@ export default function QuizTaking() {
       const totalTimeTaken = quiz.timeLimit ? (quiz.timeLimit * 60) - timeRemaining : 0;
       
       // Submit quiz completion
-      if (quizAttemptId) {
-        console.log('Submitting to endpoint:', `http://localhost:3000/api/quiz-stat/${quizAttemptId}/submit`);
-        const response = await fetch(`http://localhost:3000/api/quiz-stat/${quizAttemptId}/submit`, {
-          method: 'PUT',
+      if (quiz) {
+        console.log('Submitting quiz completion:', quiz._id);
+        const response = await fetch(`/api/quiz/${quiz._id}/complete`, {
+          credentials: 'include',
+          method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
             score: score,
-            totalTimeTaken: totalTimeTaken,
-            totalQuestions: questions.length,
-            correctAnswers: correctAnswers,
-            incorrectAnswers: questions.length - correctAnswers,
-            skippedQuestions: questions.length - Object.keys(answers).length
+            timeSpent: totalTimeTaken,
+            answers: Object.entries(answers).map(([questionId, selectedAnswer]) => ({
+              questionId: questionId,
+              selectedAnswer: selectedAnswer,
+              isCorrect: questions.find(q => q._id === questionId)?.correctAnswer === selectedAnswer
+            }))
           }),
         });
         
@@ -393,7 +385,7 @@ export default function QuizTaking() {
           answers: answers,
           score: score,
           totalTimeTaken: totalTimeTaken,
-          quizAttemptId: quizAttemptId
+          quizId: quiz?._id
         }
       });
       
