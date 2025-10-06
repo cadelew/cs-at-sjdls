@@ -16,6 +16,15 @@ export default function OAuth() {
         console.log('Checking for redirect result...');
         console.log('Current URL:', window.location.href);
         console.log('Current pathname:', window.location.pathname);
+        console.log('URL search params:', window.location.search);
+        console.log('URL hash:', window.location.hash);
+        console.log('All URL parts:', {
+          href: window.location.href,
+          pathname: window.location.pathname,
+          search: window.location.search,
+          hash: window.location.hash,
+          origin: window.location.origin
+        });
         const result = await getRedirectResult(auth);
         console.log('Redirect result:', result);
         if (result) {
