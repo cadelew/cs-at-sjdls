@@ -213,13 +213,23 @@ export default function QuizTaking() {
           }
           
           // Load existing answers
-          const existingAnswers = {};
+          let existingAnswers = {};
           if (progress.answers) {
             console.log('Processing saved answers:', progress.answers);
-            progress.answers.forEach(answer => {
-              console.log('Answer:', answer);
-              existingAnswers[answer.questionId] = answer.chosenAnswer;
-            });
+            
+            // Check if answers is an array or object
+            if (Array.isArray(progress.answers)) {
+              // If it's an array, convert to object
+              progress.answers.forEach(answer => {
+                console.log('Answer:', answer);
+                if (answer.questionId && answer.selectedAnswer !== undefined) {
+                  existingAnswers[answer.questionId] = answer.selectedAnswer;
+                }
+              });
+            } else {
+              // If it's already an object, use it directly
+              existingAnswers = progress.answers;
+            }
           }
           setAnswers(existingAnswers);
           console.log('Set answers to:', existingAnswers);
@@ -347,7 +357,10 @@ export default function QuizTaking() {
         },
         body: JSON.stringify({
           currentQuestion: currentQuestion,
-          answers: answers,
+          answers: Object.entries(answers).map(([questionId, chosenAnswer]) => ({
+            questionId: questionId,
+            selectedAnswer: chosenAnswer
+          })),
           timeRemaining: currentTimeRemaining
         }),
       });
