@@ -1,4 +1,4 @@
-import { GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult } from 'firebase/auth';
+import { GoogleAuthProvider, signInWithRedirect, getRedirectResult } from 'firebase/auth';
 import { auth } from '../firebase';
 import { useDispatch } from 'react-redux';
 import { signInSuccess } from '../redux/user/userSlice';
@@ -41,34 +41,8 @@ export default function OAuth() {
   const handleGoogleClick = async () => {
     try {
       const provider = new GoogleAuthProvider();
-      
-      // Try popup first, fallback to redirect if popup fails
-      let result;
-      try {
-        result = await signInWithPopup(auth, provider);
-      } catch (popupError) {
-        console.log('Popup failed, trying redirect:', popupError);
-        // If popup fails, use redirect
-        await signInWithRedirect(auth, provider);
-        return; // Redirect will handle the rest
-      }
-      
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || '/api'}/auth/google`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: result.user.displayName,
-          email: result.user.email,
-          photo: result.user.photoURL,
-        }),
-      });
-      const data = await res.json();
-      console.log(data);
-      dispatch(signInSuccess(data));
-      navigate('/dashboard');
+      // Use redirect instead of popup for better reliability
+      await signInWithRedirect(auth, provider);
     } catch (error) {
       console.log('could not login with google', error);
     }
