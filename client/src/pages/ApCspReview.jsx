@@ -19,6 +19,28 @@ export default function ApCspReview() {
           </p>
         </div>
 
+        {/* Action Buttons */}
+        <div className="text-center space-x-4 mb-8">
+          <Link
+            to="/quiz-list"
+            className="inline-flex items-center px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition-colors"
+          >
+            🎯 Take Practice Quizzes
+          </Link>
+          <Link
+            to="/user-dashboard"
+            className="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
+          >
+            📊 View Analytics
+          </Link>
+          <Link
+            to="/checklist"
+            className="inline-flex items-center px-6 py-3 bg-amber-50 dark:bg-black border border-black dark:border-purple-500 text-black dark:text-white hover:bg-amber-100 dark:hover:bg-gray-800 font-semibold rounded-lg transition-colors"
+          >
+            📋 AP CSP Checklist
+          </Link>
+        </div>
+
         {/* Exam Overview */}
         <div className="bg-amber-50 dark:bg-black border border-black dark:border-purple-500 rounded-lg p-6 mb-8">
           <h2 className="text-2xl font-semibold text-black dark:text-white mb-6">
@@ -244,28 +266,6 @@ export default function ApCspReview() {
               </ul>
             </div>
           </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="text-center space-x-4">
-          <Link
-            to="/quiz-list"
-            className="inline-flex items-center px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition-colors"
-          >
-            🎯 Take Practice Quizzes
-          </Link>
-          <Link
-            to="/user-dashboard"
-            className="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
-          >
-            📊 View Analytics
-          </Link>
-          <Link
-            to="/checklist"
-            className="inline-flex items-center px-6 py-3 bg-amber-50 dark:bg-black border border-black dark:border-purple-500 text-black dark:text-white hover:bg-amber-100 dark:hover:bg-gray-800 font-semibold rounded-lg transition-colors"
-          >
-            📋 AP CSP Checklist
-          </Link>
         </div>
       </div>
     </div>

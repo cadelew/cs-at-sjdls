@@ -148,6 +148,37 @@ export default function QuizResults() {
           </h1>
         </div>
 
+        {/* Action Buttons */}
+        <div className="flex flex-wrap justify-center gap-4 mb-6">
+          <button
+            onClick={() => setShowDetailedResults(!showDetailedResults)}
+            className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition-colors"
+          >
+            {showDetailedResults ? 'Hide' : 'Show'} Detailed Results
+          </button>
+          
+          <button
+            onClick={() => navigate(`/quiz/${id}`)}
+            className="px-6 py-3 bg-amber-50 dark:bg-black border border-black dark:border-purple-500 text-black dark:text-white hover:bg-amber-100 dark:hover:bg-gray-800 font-semibold rounded-lg transition-colors"
+          >
+            Retake Quiz
+          </button>
+          
+          <button
+            onClick={() => navigate('/quiz-list')}
+            className="px-6 py-3 bg-amber-50 dark:bg-black border border-black dark:border-purple-500 text-black dark:text-white hover:bg-amber-100 dark:hover:bg-gray-800 font-semibold rounded-lg transition-colors"
+          >
+            Back to Quiz List
+          </button>
+          
+          <button
+            onClick={() => navigate('/user-dashboard')}
+            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
+          >
+            📊 View Analytics
+          </button>
+        </div>
+
         {/* Score Summary */}
         <div className="bg-amber-50 dark:bg-black border border-black dark:border-purple-500 rounded-lg p-8 mb-6 text-center">
           <div className="mb-6">
@@ -196,37 +227,6 @@ export default function QuizResults() {
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex flex-wrap justify-center gap-4 mb-6">
-          <button
-            onClick={() => setShowDetailedResults(!showDetailedResults)}
-            className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition-colors"
-          >
-            {showDetailedResults ? 'Hide' : 'Show'} Detailed Results
-          </button>
-          
-          <button
-            onClick={() => navigate(`/quiz/${id}`)}
-            className="px-6 py-3 bg-amber-50 dark:bg-black border border-black dark:border-purple-500 text-black dark:text-white hover:bg-amber-100 dark:hover:bg-gray-800 font-semibold rounded-lg transition-colors"
-          >
-            Retake Quiz
-          </button>
-          
-          <button
-            onClick={() => navigate('/quiz-list')}
-            className="px-6 py-3 bg-amber-50 dark:bg-black border border-black dark:border-purple-500 text-black dark:text-white hover:bg-amber-100 dark:hover:bg-gray-800 font-semibold rounded-lg transition-colors"
-          >
-            Back to Quiz List
-          </button>
-          
-          <button
-            onClick={() => navigate('/user-dashboard')}
-            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
-          >
-            📊 View Analytics
-          </button>
         </div>
 
         {/* Detailed Results */}
