@@ -1,16 +1,58 @@
-import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult } from 'firebase/auth';
 import { auth } from '../firebase';
 import { useDispatch } from 'react-redux';
 import { signInSuccess } from '../redux/user/userSlice';
 import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 
 export default function OAuth() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  // Handle redirect result on component mount
+  useEffect(() => {
+    const handleRedirectResult = async () => {
+      try {
+        const result = await getRedirectResult(auth);
+        if (result) {
+          const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || '/api'}/auth/google`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              name: result.user.displayName,
+              email: result.user.email,
+              photo: result.user.photoURL,
+            }),
+          });
+          const data = await res.json();
+          dispatch(signInSuccess(data));
+          navigate('/dashboard');
+        }
+      } catch (error) {
+        console.log('Redirect result error:', error);
+      }
+    };
+
+    handleRedirectResult();
+  }, [dispatch, navigate]);
   const handleGoogleClick = async () => {
     try {
       const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
+      
+      // Try popup first, fallback to redirect if popup fails
+      let result;
+      try {
+        result = await signInWithPopup(auth, provider);
+      } catch (popupError) {
+        console.log('Popup failed, trying redirect:', popupError);
+        // If popup fails, use redirect
+        await signInWithRedirect(auth, provider);
+        return; // Redirect will handle the rest
+      }
+      
       const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || '/api'}/auth/google`, {
         method: 'POST',
         credentials: 'include',

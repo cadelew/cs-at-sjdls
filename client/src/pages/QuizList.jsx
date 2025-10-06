@@ -35,7 +35,7 @@ export default function QuizList() {
       
       for (const category of categories) {
         try {
-          const response = await fetch(`/api/quiz/active/${category}/general`, {
+          const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || '/api'}/quiz/active/${category}/general`, {
             credentials: 'include'
           });
           if (response.ok) {

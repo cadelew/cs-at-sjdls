@@ -142,7 +142,7 @@ export default function QuizTaking() {
       setLoading(true);
       
       // Fetch quiz details
-      const quizResponse = await fetch(`/api/quiz/${id}`, {
+      const quizResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL || '/api'}/quiz/${id}`, {
         credentials: 'include'
       });
       if (!quizResponse.ok) {
@@ -152,7 +152,7 @@ export default function QuizTaking() {
       setQuiz(quizData);
       
       // Fetch questions
-      const questionsResponse = await fetch(`/api/question/${id}/questions`, {
+      const questionsResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL || '/api'}/question/${id}/questions`, {
         credentials: 'include'
       });
       if (!questionsResponse.ok) {
@@ -177,7 +177,7 @@ export default function QuizTaking() {
       const userId = currentUser?._id || 'anonymous';
       console.log('Checking for existing attempt:', { quizId, userId, currentUser: currentUser?.username });
       
-      const response = await fetch(`/api/quiz-stat/quiz/${quizId}/user/${userId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || '/api'}/quiz-stat/quiz/${quizId}/user/${userId}`, {
         credentials: 'include'
       });
       if (response.ok) {
@@ -223,7 +223,7 @@ export default function QuizTaking() {
     try {
       console.log('Starting quiz:', { quizId, currentUser: currentUser?.username });
       
-      const response = await fetch(`/api/quiz/${quizId}/start`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || '/api'}/quiz/${quizId}/start`, {
         credentials: 'include',
         method: 'POST',
         headers: {
@@ -285,7 +285,7 @@ export default function QuizTaking() {
     const currentTimeRemaining = timeRemainingRef.current;
     
     try {
-      const response = await fetch(`/api/quiz/${quiz._id}/progress`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || '/api'}/quiz/${quiz._id}/progress`, {
         credentials: 'include',
         method: 'PUT',
         headers: {
@@ -355,7 +355,7 @@ export default function QuizTaking() {
       // Submit quiz completion
       if (quiz) {
         console.log('Submitting quiz completion:', quiz._id);
-        const response = await fetch(`/api/quiz/${quiz._id}/complete`, {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || '/api'}/quiz/${quiz._id}/complete`, {
           credentials: 'include',
           method: 'POST',
           headers: {
