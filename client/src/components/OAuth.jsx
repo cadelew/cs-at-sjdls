@@ -14,6 +14,8 @@ export default function OAuth() {
     const handleRedirectResult = async () => {
       try {
         console.log('Checking for redirect result...');
+        console.log('Current URL:', window.location.href);
+        console.log('Current pathname:', window.location.pathname);
         const result = await getRedirectResult(auth);
         console.log('Redirect result:', result);
         if (result) {
@@ -59,13 +61,8 @@ export default function OAuth() {
       console.log('Starting Google sign-in...');
       const provider = new GoogleAuthProvider();
       
-      // Set the redirect URI to the current page
-      provider.setCustomParameters({
-        redirect_uri: window.location.origin + '/sign-in'
-      });
-      
       console.log('Provider created:', provider);
-      console.log('Redirect URI set to:', window.location.origin + '/sign-in');
+      console.log('Current URL:', window.location.href);
       
       // Use redirect instead of popup for better reliability
       console.log('Calling signInWithRedirect...');
