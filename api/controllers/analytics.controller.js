@@ -1,4 +1,3 @@
-import QuizStat from '../models/quizStat.model.js';
 import Quiz from '../models/quiz.model.js';
 import Question from '../models/question.model.js';
 import { errorHandler } from '../utils/error.js';
@@ -8,11 +7,31 @@ export const getUserAnalytics = async (req, res, next) => {
     const { userId } = req.params;
     
     try {
-        // Get all completed quiz attempts for the user
-        const attempts = await QuizStat.find({ 
-            userId: userId, 
-            isCompleted: true 
-        }).populate('quizId', 'title topic difficulty');
+        // Get all completed quiz attempts for the user from the new quiz lifecycle system
+        const quizzes = await Quiz.find({ 
+            'completedBy.userId': userId
+        });
+        
+        // Extract completion data for the user
+        const attempts = [];
+        quizzes.forEach(quiz => {
+            const userCompletion = quiz.completedBy.find(completion => 
+                completion.userId.toString() === userId.toString()
+            );
+            if (userCompletion) {
+                attempts.push({
+                    _id: quiz._id,
+                    quizId: quiz._id,
+                    title: quiz.title,
+                    topic: quiz.topic,
+                    difficulty: quiz.difficulty,
+                    score: userCompletion.score,
+                    timeSpent: userCompletion.timeSpent,
+                    completedAt: userCompletion.completedAt,
+                    answers: userCompletion.answers || []
+                });
+            }
+        });
         
         if (attempts.length === 0) {
             return res.status(200).json({
@@ -32,41 +51,38 @@ export const getUserAnalytics = async (req, res, next) => {
         // Calculate analytics
         const totalQuizzes = attempts.length;
         const averageScore = attempts.reduce((sum, attempt) => sum + attempt.score, 0) / totalQuizzes;
-        const totalTimeSpent = attempts.reduce((sum, attempt) => sum + (attempt.totalTimeTaken || 0), 0);
+        const totalTimeSpent = attempts.reduce((sum, attempt) => sum + (attempt.timeSpent || 0), 0);
         
         // Topic performance
         const topicPerformance = {};
         const difficultyBreakdown = {};
         
         attempts.forEach(attempt => {
-            const quiz = attempt.quizId;
-            if (quiz) {
-                // Topic performance
-                if (!topicPerformance[quiz.topic]) {
-                    topicPerformance[quiz.topic] = {
-                        totalAttempts: 0,
-                        totalScore: 0,
-                        averageScore: 0
-                    };
-                }
-                topicPerformance[quiz.topic].totalAttempts++;
-                topicPerformance[quiz.topic].totalScore += attempt.score;
-                topicPerformance[quiz.topic].averageScore = 
-                    topicPerformance[quiz.topic].totalScore / topicPerformance[quiz.topic].totalAttempts;
-                
-                // Difficulty breakdown
-                if (!difficultyBreakdown[quiz.difficulty]) {
-                    difficultyBreakdown[quiz.difficulty] = {
-                        totalAttempts: 0,
-                        totalScore: 0,
-                        averageScore: 0
-                    };
-                }
-                difficultyBreakdown[quiz.difficulty].totalAttempts++;
-                difficultyBreakdown[quiz.difficulty].totalScore += attempt.score;
-                difficultyBreakdown[quiz.difficulty].averageScore = 
-                    difficultyBreakdown[quiz.difficulty].totalScore / difficultyBreakdown[quiz.difficulty].totalAttempts;
+            // Topic performance
+            if (!topicPerformance[attempt.topic]) {
+                topicPerformance[attempt.topic] = {
+                    totalAttempts: 0,
+                    totalScore: 0,
+                    averageScore: 0
+                };
             }
+            topicPerformance[attempt.topic].totalAttempts++;
+            topicPerformance[attempt.topic].totalScore += attempt.score;
+            topicPerformance[attempt.topic].averageScore = 
+                topicPerformance[attempt.topic].totalScore / topicPerformance[attempt.topic].totalAttempts;
+            
+            // Difficulty breakdown
+            if (!difficultyBreakdown[attempt.difficulty]) {
+                difficultyBreakdown[attempt.difficulty] = {
+                    totalAttempts: 0,
+                    totalScore: 0,
+                    averageScore: 0
+                };
+            }
+            difficultyBreakdown[attempt.difficulty].totalAttempts++;
+            difficultyBreakdown[attempt.difficulty].totalScore += attempt.score;
+            difficultyBreakdown[attempt.difficulty].averageScore = 
+                difficultyBreakdown[attempt.difficulty].totalScore / difficultyBreakdown[attempt.difficulty].totalAttempts;
         });
         
         // Recent performance (last 10 attempts)
@@ -74,10 +90,10 @@ export const getUserAnalytics = async (req, res, next) => {
             .sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt))
             .slice(0, 10)
             .map(attempt => ({
-                quizTitle: attempt.quizId?.title || 'Unknown Quiz',
+                quizTitle: attempt.title || 'Unknown Quiz',
                 score: attempt.score,
                 completedAt: attempt.completedAt,
-                timeTaken: attempt.totalTimeTaken || 0
+                timeTaken: attempt.timeSpent || 0
             }));
         
         // Improvement trend (compare first half vs second half)
@@ -303,29 +319,47 @@ export const getUserQuizHistory = async (req, res, next) => {
     const { limit = 20, offset = 0 } = req.query;
     
     try {
-        const attempts = await QuizStat.find({ 
-            userId: userId, 
-            isCompleted: true 
-        })
-        .populate('quizId', 'title topic difficulty')
-        .sort({ completedAt: -1 })
-        .limit(parseInt(limit))
-        .skip(parseInt(offset));
-        
-        const totalCount = await QuizStat.countDocuments({ 
-            userId: userId, 
-            isCompleted: true 
+        // Get all completed quiz attempts for the user from the new quiz lifecycle system
+        const quizzes = await Quiz.find({ 
+            'completedBy.userId': userId
         });
         
-        const history = attempts.map(attempt => ({
+        // Extract completion data for the user
+        const attempts = [];
+        quizzes.forEach(quiz => {
+            const userCompletion = quiz.completedBy.find(completion => 
+                completion.userId.toString() === userId.toString()
+            );
+            if (userCompletion) {
+                attempts.push({
+                    _id: quiz._id,
+                    quizId: quiz._id,
+                    title: quiz.title,
+                    topic: quiz.topic,
+                    difficulty: quiz.difficulty,
+                    score: userCompletion.score,
+                    timeSpent: userCompletion.timeSpent,
+                    completedAt: userCompletion.completedAt,
+                    answers: userCompletion.answers || []
+                });
+            }
+        });
+        
+        // Sort by completion date (most recent first)
+        attempts.sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt));
+        
+        const totalCount = attempts.length;
+        const paginatedAttempts = attempts.slice(parseInt(offset), parseInt(offset) + parseInt(limit));
+        
+        const history = paginatedAttempts.map(attempt => ({
             attemptId: attempt._id,
-            quizTitle: attempt.quizId?.title || 'Unknown Quiz',
-            topic: attempt.quizId?.topic || 'Unknown Topic',
-            difficulty: attempt.quizId?.difficulty || 'Unknown',
+            quizTitle: attempt.title || 'Unknown Quiz',
+            topic: attempt.topic || 'Unknown Topic',
+            difficulty: attempt.difficulty || 'Unknown',
             score: attempt.score,
-            totalQuestions: attempt.totalQuestions || 0,
-            correctAnswers: attempt.correctAnswers || 0,
-            timeTaken: attempt.totalTimeTaken || 0,
+            totalQuestions: attempt.answers?.length || 0,
+            correctAnswers: Math.round((attempt.score / 100) * (attempt.answers?.length || 0)),
+            timeTaken: attempt.timeSpent || 0,
             completedAt: attempt.completedAt
         }));
         
