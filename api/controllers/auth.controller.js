@@ -27,7 +27,12 @@ export const signin = async (req, res, next) => {
         const { password: hashedPassword, ...rest } = validUser._doc;
         const expiryDate = new Date(Date.now() + 3600000);
         res
-            .cookie('access_token', token, { httpOnly: true, expires: expiryDate })
+            .cookie('access_token', token, { 
+                httpOnly: true, 
+                expires: expiryDate,
+                sameSite: 'none',
+                secure: true
+            })
             .status(200)
             .json(rest)
     } catch (error) {
@@ -42,7 +47,12 @@ export const google = async (req, res, next) => {
             const token = jwt.sign({ id: user._id}, process.env.JWT_SECRET)
             const { password: hashedPassword, ...rest } = user._doc;
             const expiryDate = new Date(Date.now() + 3600000);
-            res.cookie('access_token', token, { httpOnly: true, expires: expiryDate }).status(200).json(rest);
+            res.cookie('access_token', token, { 
+                httpOnly: true, 
+                expires: expiryDate,
+                sameSite: 'none',
+                secure: true
+            }).status(200).json(rest);
         } else {   
             const generatedPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
             const hashedPassword = bcrpytjs.hashSync(generatedPassword, 10);
@@ -59,6 +69,8 @@ export const google = async (req, res, next) => {
             res.cookie('access_token', token, {
                 httpOnly: true,
                 expires: expiryDate,
+                sameSite: 'none',
+                secure: true
             }).status(200).json(rest);
         }
     } catch (error) {
