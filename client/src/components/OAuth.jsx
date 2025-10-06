@@ -13,8 +13,16 @@ export default function OAuth() {
   useEffect(() => {
     const handleRedirectResult = async () => {
       try {
+        console.log('Checking for redirect result...');
         const result = await getRedirectResult(auth);
+        console.log('Redirect result:', result);
         if (result) {
+          console.log('User data from Firebase:', {
+            name: result.user.displayName,
+            email: result.user.email,
+            photo: result.user.photoURL,
+          });
+          
           const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || '/api'}/auth/google`, {
             method: 'POST',
             credentials: 'include',
@@ -27,12 +35,20 @@ export default function OAuth() {
               photo: result.user.photoURL,
             }),
           });
+          
+          console.log('Google auth response status:', res.status);
           const data = await res.json();
-          dispatch(signInSuccess(data));
-          navigate('/dashboard');
+          console.log('Google auth response data:', data);
+          
+          if (res.ok) {
+            dispatch(signInSuccess(data));
+            navigate('/dashboard');
+          } else {
+            console.error('Google auth failed:', data);
+          }
         }
       } catch (error) {
-        console.log('Redirect result error:', error);
+        console.error('Redirect result error:', error);
       }
     };
 
@@ -40,11 +56,15 @@ export default function OAuth() {
   }, [dispatch, navigate]);
   const handleGoogleClick = async () => {
     try {
+      console.log('Starting Google sign-in...');
       const provider = new GoogleAuthProvider();
+      console.log('Provider created:', provider);
       // Use redirect instead of popup for better reliability
+      console.log('Calling signInWithRedirect...');
       await signInWithRedirect(auth, provider);
+      console.log('Redirect initiated successfully');
     } catch (error) {
-      console.log('could not login with google', error);
+      console.error('Could not login with google:', error);
     }
   };
   return (
