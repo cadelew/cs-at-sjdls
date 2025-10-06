@@ -197,9 +197,9 @@ export default function QuizTaking() {
         const currentQuizProgress = inProgressQuizzes.find(q => q._id === quizId);
         console.log('Current quiz progress:', currentQuizProgress);
         
-        if (currentQuizProgress && currentQuizProgress.progressInfo) {
+        if (currentQuizProgress && currentQuizProgress.userProgress) {
           // Resume existing attempt
-          const progress = currentQuizProgress.progressInfo;
+          const progress = currentQuizProgress.userProgress;
           console.log('Resuming with progress:', progress);
           setCurrentQuestion(progress.currentQuestion || 0);
           setIsResumed(true);
@@ -261,6 +261,31 @@ export default function QuizTaking() {
       
       const data = await response.json();
       console.log('Quiz started:', data);
+      
+      // If resuming, load the progress data
+      if (data.progress) {
+        console.log('Loading resumed progress:', data.progress);
+        setCurrentQuestion(data.progress.currentQuestion || 0);
+        setIsResumed(true);
+        
+        // Set timer from saved time or quiz time limit
+        if (data.progress.timeRemaining !== null && data.progress.timeRemaining !== undefined) {
+          setTimeRemaining(data.progress.timeRemaining);
+        } else if (quizData.timeLimit) {
+          const timeInSeconds = quizData.timeLimit * 60;
+          setTimeRemaining(timeInSeconds);
+        }
+        
+        // Load existing answers
+        const existingAnswers = {};
+        if (data.progress.answers) {
+          data.progress.answers.forEach(answer => {
+            existingAnswers[answer.questionId] = answer.chosenAnswer;
+          });
+        }
+        setAnswers(existingAnswers);
+        console.log('Loaded answers:', existingAnswers);
+      }
       
       // Set timer if quiz has time limit
       if (quizData && quizData.timeLimit) {
