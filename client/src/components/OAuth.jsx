@@ -41,10 +41,6 @@ export default function OAuth() {
   const handleGoogleClick = async () => {
     try {
       const provider = new GoogleAuthProvider();
-      // Configure redirect to go back to sign-in page
-      provider.setCustomParameters({
-        redirect_uri: window.location.origin + '/sign-in'
-      });
       // Use redirect instead of popup for better reliability
       await signInWithRedirect(auth, provider);
     } catch (error) {
