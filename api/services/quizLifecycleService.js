@@ -326,7 +326,7 @@ class QuizLifecycleService {
         throw new Error('Quiz not found');
       }
 
-      if (quiz.status !== 'active') {
+      if (quiz.status !== 'active' && quiz.status !== 'in-progress') {
         throw new Error('Quiz is not available');
       }
 

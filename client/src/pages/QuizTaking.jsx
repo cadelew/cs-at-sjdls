@@ -189,7 +189,8 @@ export default function QuizTaking() {
       });
       
       if (response.ok) {
-        const inProgressQuizzes = await response.json();
+        const responseData = await response.json();
+        const inProgressQuizzes = responseData.quizzes || [];
         const currentQuizProgress = inProgressQuizzes.find(q => q._id === quizId);
         
         if (currentQuizProgress && currentQuizProgress.progressInfo) {
