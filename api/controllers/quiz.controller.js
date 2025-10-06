@@ -82,12 +82,20 @@ export const generateQuiz = async (req, res, next) => {
             title
         };
 
-        const result = await quizGenerationService.generateRegularQuiz(config);
+        // Get user performance data for adaptive timing (if user is authenticated)
+        const userId = req.user?.id || null;
+        const userPerformance = userId ? await quizGenerationService.getUserPerformance(userId) : null;
+        
+        const result = await quizGenerationService.generateRegularQuiz(config, userPerformance);
+
+        // Add timing breakdown to response
+        const timingBreakdown = quizGenerationService.calculateTimingBreakdown(result.questions, userPerformance);
 
         res.status(201).json({
             success: true,
             message: 'Quiz generated successfully',
-            ...result
+            ...result,
+            timingBreakdown
         });
 
     } catch (error) {
@@ -140,10 +148,19 @@ export const previewQuiz = async (req, res, next) => {
         // Get available question counts for each category
         const stats = await quizGenerationService.getQuestionBankStats();
         
-        // Calculate estimated time (in minutes)
+        // Get user performance data for adaptive timing preview
+        const userId = req.user?.id || null;
+        const userPerformance = userId ? await quizGenerationService.getUserPerformance(userId) : null;
+        
+        // Calculate estimated time using adaptive timing
         const estimatedTime = quizGenerationService.calculateTimeLimit(
-            Array(config.totalQuestions).fill({ difficulty: difficulty === 'mixed' ? 'medium' : difficulty }),
-            null
+            Array(config.totalQuestions).fill({ 
+                difficulty: difficulty === 'mixed' ? 'medium' : difficulty,
+                questionType: 'code_analysis', // Default for estimation
+                bigIdea: 1 // Default for estimation
+            }),
+            null,
+            userPerformance
         );
 
         res.status(200).json({

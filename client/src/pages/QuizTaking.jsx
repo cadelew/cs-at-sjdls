@@ -527,6 +527,29 @@ export default function QuizTaking() {
                   Time: {formatTime(timeRemaining)}
                 </div>
               )}
+              
+              {/* Adaptive Timing Info */}
+              {quiz?.timingBreakdown && (
+                <div className="text-xs text-gray-600 dark:text-gray-400 text-right">
+                  <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-2 border border-gray-200 dark:border-gray-600">
+                    <div className="font-semibold mb-1">⏱️ Adaptive Timing</div>
+                    <div className="space-y-1">
+                      <div>Total: {Math.round(quiz.timingBreakdown.total)} min</div>
+                      <div>Buffer: {Math.round(quiz.timingBreakdown.bufferTime)} min</div>
+                      {quiz.timingBreakdown.byQuestionType && Object.keys(quiz.timingBreakdown.byQuestionType).length > 0 && (
+                        <div className="text-xs">
+                          {Object.entries(quiz.timingBreakdown.byQuestionType).map(([type, time]) => (
+                            <div key={type} className="flex justify-between">
+                              <span className="capitalize">{type.replace('_', ' ')}:</span>
+                              <span>{Math.round(time)}m</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
           

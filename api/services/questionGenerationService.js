@@ -151,9 +151,9 @@ class QuestionGenerationService {
       5: 24   // Impact of Computing (21-26%)
     };
     const defaultQuestionType = { 
-      robot_navigation: 10, // Reduced frequency - only 10% of questions comment out if not working
-      code_analysis: 35, 
-      algorithm: 25, 
+      robot_navigation: 0, // Temporarily disabled - 0% frequency due to validation complexity
+      code_analysis: 40, 
+      algorithm: 30, 
       data_structure: 20, 
       problem_solving: 10 
     };
@@ -339,6 +339,8 @@ Respond with ONLY valid JSON (no markdown, no code blocks):
 
     // Generate questions for each question type
     for (const [questionType, count] of Object.entries(distribution.questionType)) {
+      // Robot questions need more retries due to complex validation
+      const effectiveMaxRetries = questionType === 'robot_navigation' ? Math.max(maxRetries, 5) : maxRetries;
       console.log(`Generating ${count} ${questionType} questions...`);
       
       for (let i = 0; i < count; i++) {
@@ -347,7 +349,7 @@ Respond with ONLY valid JSON (no markdown, no code blocks):
         let isValid = false;
 
         // Try to generate a valid question
-        while (attempts < maxRetries && !isValid) {
+        while (attempts < effectiveMaxRetries && !isValid) {
           attempts++;
           
           try {
@@ -374,7 +376,7 @@ Respond with ONLY valid JSON (no markdown, no code blocks):
         if (question && isValid) {
           questions.push(question);
         } else {
-          console.error(`Failed to generate valid ${questionType} question after ${maxRetries} attempts`);
+          console.error(`Failed to generate valid ${questionType} question after ${effectiveMaxRetries} attempts`);
         }
       }
     }

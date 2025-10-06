@@ -25,6 +25,24 @@ const DIFFICULTY_LEVELS = {
   'hard': { weight: 15, timePerQuestion: 1.5 } // 1 minute 30 seconds
 };
 
+// Question type timing multipliers (based on AP CSP exam patterns)
+const QUESTION_TYPE_TIMING = {
+  'code_analysis': 1.0,      // Standard time - code reading and analysis
+  'algorithm': 1.3,          // 30% more time - requires step-by-step thinking
+  'data_structure': 1.2,     // 20% more time - complex data manipulation
+  'problem_solving': 1.4,    // 40% more time - creative problem solving
+  'robot_navigation': 1.5    // 50% more time - spatial reasoning and simulation
+};
+
+// Big idea complexity multipliers (based on AP CSP topic difficulty)
+const BIG_IDEA_TIMING = {
+  1: 1.0,  // Creative Development - standard
+  2: 1.1,  // Data - slightly more complex
+  3: 1.3,  // Algorithms & Programming - most complex
+  4: 1.0,  // Computer Systems & Networks - standard
+  5: 1.2   // Impact of Computing - requires broader thinking
+};
+
 class QuizGenerationService {
   constructor() {
     this.defaultConfig = {
@@ -39,7 +57,7 @@ class QuizGenerationService {
   }
 
   // Generate a regular quiz with balanced AP CSP coverage
-  async generateRegularQuiz(config = {}) {
+  async generateRegularQuiz(config = {}, userPerformance = null) {
     try {
       console.log('Generating regular quiz with config:', config);
       
@@ -58,7 +76,7 @@ class QuizGenerationService {
       }
       
       // Calculate time limit if not provided
-      const timeLimit = this.calculateTimeLimit(selectedQuestions, quizConfig.timeLimit);
+      const timeLimit = this.calculateTimeLimit(selectedQuestions, quizConfig.timeLimit, userPerformance);
       
       // Create quiz metadata
       const quizData = {
@@ -242,20 +260,70 @@ class QuizGenerationService {
   }
 
   // Calculate time limit based on questions and difficulty (returns minutes)
-  calculateTimeLimit(questions, providedTimeLimit) {
+  calculateTimeLimit(questions, providedTimeLimit, userPerformance = null) {
     if (providedTimeLimit) {
       return providedTimeLimit; // Assume provided time is already in minutes
     }
     
-    // Calculate based on average time per question
+    // Calculate adaptive time based on question characteristics
     let totalTimeMinutes = 0;
     questions.forEach(question => {
       const difficulty = question.difficulty || 'medium';
-      totalTimeMinutes += DIFFICULTY_LEVELS[difficulty].timePerQuestion;
+      const questionType = question.questionType || 'code_analysis';
+      const bigIdea = question.bigIdea || 1;
+      
+      // Base time from difficulty
+      let questionTime = DIFFICULTY_LEVELS[difficulty].timePerQuestion;
+      
+      // Apply question type multiplier
+      questionTime *= QUESTION_TYPE_TIMING[questionType] || 1.0;
+      
+      // Apply big idea complexity multiplier
+      questionTime *= BIG_IDEA_TIMING[bigIdea] || 1.0;
+      
+      // Apply user performance adaptation if available
+      if (userPerformance) {
+        questionTime = this.applyPerformanceAdaptation(questionTime, question, userPerformance);
+      }
+      
+      totalTimeMinutes += questionTime;
     });
     
-    // Add 10% buffer time and round up to nearest minute
-    return Math.ceil(totalTimeMinutes * 1.1);
+    // Add 15% buffer time for review and double-checking
+    const bufferTime = totalTimeMinutes * 0.15;
+    const totalWithBuffer = totalTimeMinutes + bufferTime;
+    
+    // Round up to nearest minute, minimum 5 minutes
+    return Math.max(5, Math.ceil(totalWithBuffer));
+  }
+
+  // Apply user performance adaptation to timing
+  applyPerformanceAdaptation(baseTime, question, userPerformance) {
+    if (!userPerformance || !userPerformance.byQuestionType || !userPerformance.byDifficulty) {
+      return baseTime;
+    }
+    
+    const questionType = question.questionType || 'code_analysis';
+    const difficulty = question.difficulty || 'medium';
+    
+    // Get user's average accuracy for this question type and difficulty
+    const typeAccuracy = userPerformance.byQuestionType[questionType]?.accuracy || 0.7;
+    const difficultyAccuracy = userPerformance.byDifficulty[difficulty]?.accuracy || 0.7;
+    const combinedAccuracy = (typeAccuracy + difficultyAccuracy) / 2;
+    
+    // Adjust timing based on performance:
+    // - High accuracy (>80%): Reduce time by 10-20% (user is fast)
+    // - Medium accuracy (60-80%): Keep standard time
+    // - Low accuracy (<60%): Increase time by 10-20% (user needs more time)
+    
+    let timeMultiplier = 1.0;
+    if (combinedAccuracy > 0.8) {
+      timeMultiplier = 0.85; // 15% faster for high performers
+    } else if (combinedAccuracy < 0.6) {
+      timeMultiplier = 1.15; // 15% slower for struggling users
+    }
+    
+    return baseTime * timeMultiplier;
   }
 
   // Generate quiz title based on configuration
@@ -327,6 +395,62 @@ class QuizGenerationService {
     }
     
     return stats;
+  }
+
+  // Get user performance data for adaptive timing
+  async getUserPerformance(userId) {
+    try {
+      // This would typically query a user performance/analytics table
+      // For now, return null to use default timing
+      // In a real implementation, you'd query:
+      // - User's historical quiz results
+      // - Performance by question type
+      // - Performance by difficulty level
+      // - Average time per question type
+      
+      return null; // Placeholder - implement when user analytics are available
+    } catch (error) {
+      console.error('Error getting user performance:', error);
+      return null;
+    }
+  }
+
+  // Calculate timing breakdown for display
+  calculateTimingBreakdown(questions, userPerformance = null) {
+    const breakdown = {
+      byDifficulty: {},
+      byQuestionType: {},
+      byBigIdea: {},
+      total: 0
+    };
+
+    questions.forEach(question => {
+      const difficulty = question.difficulty || 'medium';
+      const questionType = question.questionType || 'code_analysis';
+      const bigIdea = question.bigIdea || 1;
+      
+      // Calculate time for this question
+      let questionTime = DIFFICULTY_LEVELS[difficulty].timePerQuestion;
+      questionTime *= QUESTION_TYPE_TIMING[questionType] || 1.0;
+      questionTime *= BIG_IDEA_TIMING[bigIdea] || 1.0;
+      
+      if (userPerformance) {
+        questionTime = this.applyPerformanceAdaptation(questionTime, question, userPerformance);
+      }
+      
+      // Add to breakdown
+      breakdown.byDifficulty[difficulty] = (breakdown.byDifficulty[difficulty] || 0) + questionTime;
+      breakdown.byQuestionType[questionType] = (breakdown.byQuestionType[questionType] || 0) + questionTime;
+      breakdown.byBigIdea[bigIdea] = (breakdown.byBigIdea[bigIdea] || 0) + questionTime;
+      breakdown.total += questionTime;
+    });
+
+    // Add buffer time
+    const bufferTime = breakdown.total * 0.15;
+    breakdown.total = Math.max(5, Math.ceil(breakdown.total + bufferTime));
+    breakdown.bufferTime = bufferTime;
+
+    return breakdown;
   }
 }
 

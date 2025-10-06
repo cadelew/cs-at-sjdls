@@ -109,6 +109,7 @@ Generate the question following this EXACT template.
     let robotPos = null;
     let goalPos = null;
     let direction = 0;
+    let gridRowIndex = 0; // Track actual grid row index
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i].trim();
@@ -132,8 +133,8 @@ Generate the question following this EXACT template.
         const parts = line.split(/\s+/);
         const x = parts.findIndex(part => part.includes(symbol));
         if (x !== -1) {
-          robotPos = { x: x, y: gridLines.length };
-          console.log(`Found robot at (${x}, ${gridLines.length}) facing ${symbol}`);
+          robotPos = { x: x, y: gridRowIndex };
+          console.log(`Found robot at (${x}, ${gridRowIndex}) facing ${symbol}`);
         }
       } else if (line.includes('R')) {
         // Handle 'R' format for robot
@@ -141,8 +142,8 @@ Generate the question following this EXACT template.
         const x = parts.findIndex(part => part.includes('R'));
         if (x !== -1) {
           direction = 0; // Default to facing right
-          robotPos = { x: x, y: gridLines.length };
-          console.log(`Found robot (R) at (${x}, ${gridLines.length})`);
+          robotPos = { x: x, y: gridRowIndex };
+          console.log(`Found robot (R) at (${x}, ${gridRowIndex})`);
         }
       }
 
@@ -152,19 +153,20 @@ Generate the question following this EXACT template.
         const parts = line.split(/\s+/);
         const x = parts.findIndex(part => part.includes('✔'));
         if (x !== -1) {
-          goalPos = { x: x, y: gridLines.length };
-          console.log(`Found goal (✔) at (${x}, ${gridLines.length})`);
+          goalPos = { x: x, y: gridRowIndex };
+          console.log(`Found goal (✔) at (${x}, ${gridRowIndex})`);
         }
       } else if (line.includes('G')) {
         const parts = line.split(/\s+/);
         const x = parts.findIndex(part => part.includes('G'));
         if (x !== -1) {
-          goalPos = { x: x, y: gridLines.length };
-          console.log(`Found goal (G) at (${x}, ${gridLines.length})`);
+          goalPos = { x: x, y: gridRowIndex };
+          console.log(`Found goal (G) at (${x}, ${gridRowIndex})`);
         }
       }
 
       gridLines.push(line);
+      gridRowIndex++; // Increment only for actual grid lines
     }
 
     console.log('Parse result:', { robotPos, goalPos, direction, gridLines });
@@ -271,7 +273,7 @@ Generate the question following this EXACT template.
         }
       } else {
         // Single commands - handle various formats
-        if (trimmed.includes('MOVE_FORWARD') || trimmed.includes('Move Forward') || trimmed.includes('move forward')) {
+        if (trimmed.includes('MOVE_FORWARD') || trimmed.includes('Move Forward') || trimmed.includes('move forward') || trimmed.includes('move_forward') || trimmed.includes('moveForward()')) {
           // Handle "Move Forward X times" format
           const moveMatch = trimmed.match(/Move Forward (\d+) time/i);
           if (moveMatch) {
@@ -293,10 +295,10 @@ Generate the question following this EXACT template.
             }
           }
         }
-        if (trimmed.includes('ROTATE_LEFT') || trimmed.includes('Turn Left') || trimmed.includes('turn left') || trimmed.includes('TURN_LEFT') || trimmed.includes('TURN LEFT')) {
+        if (trimmed.includes('ROTATE_LEFT') || trimmed.includes('Turn Left') || trimmed.includes('turn left') || trimmed.includes('TURN_LEFT') || trimmed.includes('TURN LEFT') || trimmed.includes('turn_left') || trimmed.includes('turnLeft()')) {
           commands.push({ type: 'ROTATE_LEFT' });
         }
-        if (trimmed.includes('ROTATE_RIGHT') || trimmed.includes('Turn Right') || trimmed.includes('turn right') || trimmed.includes('TURN_RIGHT') || trimmed.includes('TURN RIGHT')) {
+        if (trimmed.includes('ROTATE_RIGHT') || trimmed.includes('Turn Right') || trimmed.includes('turn right') || trimmed.includes('TURN_RIGHT') || trimmed.includes('TURN RIGHT') || trimmed.includes('turn_right') || trimmed.includes('turnRight()')) {
           commands.push({ type: 'ROTATE_RIGHT' });
         }
         if (trimmed.includes('Move Right') || trimmed.includes('move right')) {
@@ -315,6 +317,91 @@ Generate the question following this EXACT template.
           commands.push({ type: 'ROTATE_LEFT' });
           commands.push({ type: 'MOVE_FORWARD' });
         }
+        // Handle simple letter commands (F, L, R) - be more flexible with the regex
+        if (trimmed.match(/^[0-9\.\s]*[FLR\s,\.]+$/)) {
+          const letters = trimmed.match(/[FLR]/g);
+          if (letters) {
+            for (const letter of letters) {
+              switch (letter) {
+                case 'F':
+                  commands.push({ type: 'MOVE_FORWARD' });
+                  break;
+                case 'L':
+                  commands.push({ type: 'ROTATE_LEFT' });
+                  break;
+                case 'R':
+                  commands.push({ type: 'ROTATE_RIGHT' });
+                  break;
+              }
+            }
+          }
+        }
+        
+        // Handle "TURN R, MOVE F" format
+        if (trimmed.includes('TURN R') || trimmed.includes('TURN L')) {
+          if (trimmed.includes('TURN R')) {
+            commands.push({ type: 'ROTATE_RIGHT' });
+          }
+          if (trimmed.includes('TURN L')) {
+            commands.push({ type: 'ROTATE_LEFT' });
+          }
+        }
+        if (trimmed.includes('MOVE F')) {
+          commands.push({ type: 'MOVE_FORWARD' });
+        }
+        
+        // Handle "F F TR F F" format (TR = Turn Right, TL = Turn Left)
+        if (trimmed.includes('TR') || trimmed.includes('TL')) {
+          const parts = trimmed.split(/\s+/);
+          for (const part of parts) {
+            if (part === 'F') {
+              commands.push({ type: 'MOVE_FORWARD' });
+            } else if (part === 'TR') {
+              commands.push({ type: 'ROTATE_RIGHT' });
+            } else if (part === 'TL') {
+              commands.push({ type: 'ROTATE_LEFT' });
+            }
+          }
+        }
+        
+        // Handle "move(EAST)", "move(SOUTH)" format
+        if (trimmed.includes('move(EAST)') || trimmed.includes('move(SOUTH)') || trimmed.includes('move(NORTH)') || trimmed.includes('move(WEST)')) {
+          if (trimmed.includes('move(EAST)')) {
+            commands.push({ type: 'MOVE_FORWARD' });
+          }
+          if (trimmed.includes('move(WEST)')) {
+            commands.push({ type: 'ROTATE_LEFT' });
+            commands.push({ type: 'ROTATE_LEFT' });
+            commands.push({ type: 'MOVE_FORWARD' });
+          }
+          if (trimmed.includes('move(NORTH)')) {
+            commands.push({ type: 'ROTATE_LEFT' });
+            commands.push({ type: 'MOVE_FORWARD' });
+          }
+          if (trimmed.includes('move(SOUTH)')) {
+            commands.push({ type: 'ROTATE_RIGHT' });
+            commands.push({ type: 'MOVE_FORWARD' });
+          }
+        }
+        
+        // Handle cardinal direction functions (moveEast(), moveSouth(), etc.)
+        if (trimmed.includes('moveEast()') || trimmed.includes('move_east()')) {
+          commands.push({ type: 'MOVE_FORWARD' });
+        }
+        if (trimmed.includes('moveWest()') || trimmed.includes('move_west()')) {
+          commands.push({ type: 'ROTATE_LEFT' });
+          commands.push({ type: 'ROTATE_LEFT' });
+          commands.push({ type: 'MOVE_FORWARD' });
+        }
+        if (trimmed.includes('moveNorth()') || trimmed.includes('move_north()')) {
+          commands.push({ type: 'ROTATE_LEFT' });
+          commands.push({ type: 'MOVE_FORWARD' });
+        }
+        if (trimmed.includes('moveSouth()') || trimmed.includes('move_south()')) {
+          commands.push({ type: 'ROTATE_RIGHT' });
+          commands.push({ type: 'MOVE_FORWARD' });
+        }
+        
         // Handle cardinal directions
         if (trimmed.includes('MOVE NORTH') || trimmed.includes('move north')) {
           commands.push({ type: 'ROTATE_LEFT' });
