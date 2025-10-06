@@ -155,8 +155,8 @@ class QuizLifecycleService {
         throw new Error('Quiz not found');
       }
 
-      if (quiz.status !== 'active') {
-        throw new Error('Quiz is not active');
+      if (quiz.status !== 'active' && quiz.status !== 'in-progress') {
+        throw new Error('Quiz is not available for completion');
       }
 
       // Check if user already completed this quiz
@@ -167,6 +167,11 @@ class QuizLifecycleService {
       if (existingCompletion) {
         throw new Error('User has already completed this quiz');
       }
+
+      // Remove user from in-progress list
+      quiz.inProgressBy = quiz.inProgressBy.filter(progress => 
+        progress.userId.toString() !== userId.toString()
+      );
 
       // Add completion data
       quiz.completedBy.push({
