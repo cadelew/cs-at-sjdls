@@ -13,6 +13,17 @@ const quizSchema = new mongoose.Schema({
     isActive: Boolean,
     generatedBy: { type: String, default: 'manual' }, // 'manual', 'system', 'ai'
     questionIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Question' }],
+    category: {
+        type: String,
+        enum: ['practice', 'exam', 'topic-specific', 'mixed', 'custom'],
+        default: 'practice'
+    },
+    subcategory: {
+        type: String,
+        enum: ['general', 'big-idea-1', 'big-idea-2', 'big-idea-3', 'big-idea-4', 'big-idea-5', 'algorithms', 'data-structures', 'networking', 'impact', 'code-analysis', 'problem-solving'],
+        default: 'general'
+    },
+    tags: [String], // Additional tags for filtering
     metadata: {
         distribution: {
             bigIdea: mongoose.Schema.Types.Mixed,
@@ -22,7 +33,8 @@ const quizSchema = new mongoose.Schema({
         generatedAt: Date,
         questionTypes: [String],
         bigIdeas: [Number],
-        difficulties: [String]
+        difficulties: [String],
+        timingBreakdown: mongoose.Schema.Types.Mixed // Store timing breakdown
     }
 });
 

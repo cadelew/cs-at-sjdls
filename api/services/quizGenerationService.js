@@ -52,8 +52,124 @@ class QuizGenerationService {
       bigIdeaDistribution: 'balanced', // balanced, specific, custom
       questionTypeDistribution: 'balanced',
       topic: 'general', // general, specific topic
-      passingScore: 70
+      passingScore: 70,
+      category: 'practice',
+      subcategory: 'general'
     };
+  }
+
+  // Quiz category configurations
+  getCategoryConfig(category, subcategory = 'general') {
+    const configs = {
+      'practice': {
+        title: 'Practice Quiz',
+        description: 'General practice quiz covering all AP CSP topics',
+        timeLimit: null, // Will be calculated
+        passingScore: 70,
+        difficulty: 'mixed',
+        bigIdeaDistribution: 'balanced',
+        questionTypeDistribution: 'balanced'
+      },
+      'exam': {
+        title: 'AP CSP Practice Exam',
+        description: 'Full-length practice exam simulating the real AP CSP test',
+        timeLimit: 120, // 2 hours like real exam
+        passingScore: 70,
+        difficulty: 'mixed',
+        bigIdeaDistribution: 'exam', // Based on actual exam weights
+        questionTypeDistribution: 'exam'
+      },
+      'topic-specific': {
+        title: `${this.getSubcategoryTitle(subcategory)} Quiz`,
+        description: `Focused quiz on ${this.getSubcategoryTitle(subcategory)}`,
+        timeLimit: null,
+        passingScore: 70,
+        difficulty: 'mixed',
+        bigIdeaDistribution: this.getSubcategoryDistribution(subcategory),
+        questionTypeDistribution: this.getSubcategoryQuestionTypes(subcategory)
+      },
+      'mixed': {
+        title: 'Mixed Topics Quiz',
+        description: 'Quiz covering multiple AP CSP topics',
+        timeLimit: null,
+        passingScore: 70,
+        difficulty: 'mixed',
+        bigIdeaDistribution: 'balanced',
+        questionTypeDistribution: 'balanced'
+      },
+      'custom': {
+        title: 'Custom Quiz',
+        description: 'Customized quiz based on your specifications',
+        timeLimit: null,
+        passingScore: 70,
+        difficulty: 'mixed',
+        bigIdeaDistribution: 'balanced',
+        questionTypeDistribution: 'balanced'
+      }
+    };
+
+    return configs[category] || configs['practice'];
+  }
+
+  getSubcategoryTitle(subcategory) {
+    const titles = {
+      'general': 'General AP CSP',
+      'big-idea-1': 'Creative Development',
+      'big-idea-2': 'Data',
+      'big-idea-3': 'Algorithms & Programming',
+      'big-idea-4': 'Computer Systems & Networks',
+      'big-idea-5': 'Impact of Computing',
+      'algorithms': 'Algorithms',
+      'data-structures': 'Data Structures',
+      'networking': 'Networking',
+      'impact': 'Impact of Computing',
+      'code-analysis': 'Code Analysis',
+      'problem-solving': 'Problem Solving'
+    };
+    return titles[subcategory] || 'General AP CSP';
+  }
+
+  getSubcategoryDistribution(subcategory) {
+    const distributions = {
+      'big-idea-1': { 1: 100 },
+      'big-idea-2': { 2: 100 },
+      'big-idea-3': { 3: 100 },
+      'big-idea-4': { 4: 100 },
+      'big-idea-5': { 5: 100 },
+      'algorithms': { 3: 100 },
+      'data-structures': { 2: 100 },
+      'networking': { 4: 100 },
+      'impact': { 5: 100 },
+      'code-analysis': 'balanced',
+      'problem-solving': 'balanced',
+      'general': 'balanced'
+    };
+    return distributions[subcategory] || 'balanced';
+  }
+
+  getSubcategoryQuestionTypes(subcategory) {
+    const questionTypes = {
+      'algorithms': { algorithm: 100 },
+      'data-structures': { data_structure: 100 },
+      'code-analysis': { code_analysis: 100 },
+      'problem-solving': { problem_solving: 100 },
+      'general': 'balanced'
+    };
+    return questionTypes[subcategory] || 'balanced';
+  }
+
+  generateTags(config) {
+    const tags = [config.category];
+    if (config.subcategory !== 'general') {
+      tags.push(config.subcategory);
+    }
+    if (config.difficulty !== 'mixed') {
+      tags.push(config.difficulty);
+    }
+    if (config.topic !== 'general') {
+      tags.push(config.topic);
+    }
+    return tags;
   }
 
   // Generate a regular quiz with balanced AP CSP coverage
@@ -63,12 +179,16 @@ class QuizGenerationService {
       
       const quizConfig = { ...this.defaultConfig, ...config };
       
+      // Apply category-specific configuration
+      const categoryConfig = this.getCategoryConfig(quizConfig.category, quizConfig.subcategory);
+      const finalConfig = { ...quizConfig, ...categoryConfig };
+      
       // Calculate question distribution
-      const distribution = this.calculateQuestionDistribution(quizConfig);
+      const distribution = this.calculateQuestionDistribution(finalConfig);
       console.log('Question distribution:', distribution);
       
       // Select questions from question bank
-      const selectedQuestions = await this.selectQuestions(distribution, quizConfig);
+      const selectedQuestions = await this.selectQuestions(distribution, finalConfig);
       console.log(`Selected ${selectedQuestions.length} questions`);
       
       if (selectedQuestions.length === 0) {
@@ -76,20 +196,23 @@ class QuizGenerationService {
       }
       
       // Calculate time limit if not provided
-      const timeLimit = this.calculateTimeLimit(selectedQuestions, quizConfig.timeLimit, userPerformance);
+      const timeLimit = this.calculateTimeLimit(selectedQuestions, finalConfig.timeLimit, userPerformance);
       
       // Create quiz metadata
       const quizData = {
-        title: this.generateQuizTitle(quizConfig),
-        description: this.generateQuizDescription(quizConfig, selectedQuestions),
-        topic: quizConfig.topic,
-        difficulty: quizConfig.difficulty,
+        title: this.generateQuizTitle(finalConfig),
+        description: this.generateQuizDescription(finalConfig, selectedQuestions),
+        topic: finalConfig.topic,
+        difficulty: finalConfig.difficulty,
         timeLimit: timeLimit,
         totalQuestions: selectedQuestions.length,
-        passingScore: quizConfig.passingScore,
+        passingScore: finalConfig.passingScore,
         isActive: true,
         generatedBy: 'system',
         questionIds: selectedQuestions.map(q => q._id),
+        category: finalConfig.category,
+        subcategory: finalConfig.subcategory,
+        tags: this.generateTags(finalConfig),
         metadata: {
           distribution: distribution,
           generatedAt: new Date(),
