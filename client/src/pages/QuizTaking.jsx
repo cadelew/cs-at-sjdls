@@ -30,7 +30,6 @@ export default function QuizTaking() {
   // Re-fetch quiz data when user changes
   useEffect(() => {
     if (id && currentUser) {
-      console.log('User changed, refetching quiz data');
       fetchQuizData();
     }
   }, [currentUser]);
@@ -176,13 +175,11 @@ export default function QuizTaking() {
 
   const checkForExistingAttempt = async (quizId, quizData) => {
     if (isStartingQuiz) {
-      console.log('Already starting quiz, skipping duplicate call');
       return;
     }
     
     try {
       const userId = currentUser?._id || 'anonymous';
-      console.log('Checking for existing attempt:', { quizId, userId, currentUser: currentUser?.username });
       
       // Check if user has in-progress quizzes
       const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || '/api'}/quiz/in-progress/user`, {
@@ -191,16 +188,12 @@ export default function QuizTaking() {
       
       if (response.ok) {
         const responseData = await response.json();
-        console.log('In-progress quizzes response:', responseData);
         const inProgressQuizzes = responseData.quizzes || [];
-        console.log('In-progress quizzes array:', inProgressQuizzes);
         const currentQuizProgress = inProgressQuizzes.find(q => q._id === quizId);
-        console.log('Current quiz progress:', currentQuizProgress);
         
         if (currentQuizProgress && currentQuizProgress.userProgress) {
           // Resume existing attempt
           const progress = currentQuizProgress.userProgress;
-          console.log('Resuming with progress:', progress);
           setCurrentQuestion(progress.currentQuestion || 0);
           setIsResumed(true);
           
@@ -215,13 +208,11 @@ export default function QuizTaking() {
           // Load existing answers
           let existingAnswers = {};
           if (progress.answers) {
-            console.log('Processing saved answers:', progress.answers);
             
             // Check if answers is an array or object
             if (Array.isArray(progress.answers)) {
               // If it's an array, convert to object
               progress.answers.forEach(answer => {
-                console.log('Answer:', answer);
                 if (answer.questionId && answer.selectedAnswer !== undefined) {
                   existingAnswers[answer.questionId] = answer.selectedAnswer;
                 }
@@ -232,7 +223,6 @@ export default function QuizTaking() {
             }
           }
           setAnswers(existingAnswers);
-          console.log('Set answers to:', existingAnswers);
         } else {
           // Start new attempt
           await startQuizAttempt(quizId, quizData);
@@ -250,13 +240,11 @@ export default function QuizTaking() {
 
   const startQuizAttempt = async (quizId, quizData) => {
     if (isStartingQuiz) {
-      console.log('Already starting quiz, skipping duplicate call');
       return;
     }
     
     setIsStartingQuiz(true);
     try {
-      console.log('Starting quiz:', { quizId, currentUser: currentUser?.username });
       
       const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || '/api'}/quiz/${quizId}/start`, {
         credentials: 'include',
@@ -273,11 +261,9 @@ export default function QuizTaking() {
       }
       
       const data = await response.json();
-      console.log('Quiz started:', data);
       
       // If resuming, load the progress data
       if (data.progress) {
-        console.log('Loading resumed progress:', data.progress);
         setCurrentQuestion(data.progress.currentQuestion || 0);
         setIsResumed(true);
         
@@ -297,13 +283,11 @@ export default function QuizTaking() {
           });
         }
         setAnswers(existingAnswers);
-        console.log('Loaded answers:', existingAnswers);
       }
       
       // Set timer if quiz has time limit
       if (quizData && quizData.timeLimit) {
         const timeInSeconds = quizData.timeLimit * 60; // Convert minutes to seconds
-        console.log('Setting timer:', quizData.timeLimit, 'minutes =', timeInSeconds, 'seconds');
         setTimeRemaining(timeInSeconds);
       }
     } catch (err) {
@@ -399,7 +383,6 @@ export default function QuizTaking() {
   const handleSubmitQuiz = async () => {
     if (submitting) return;
     
-    console.log('Submitting quiz:', { 
       quizId: quiz?._id, 
       currentUser: currentUser?.username, 
       userId: currentUser?._id,
@@ -421,7 +404,6 @@ export default function QuizTaking() {
       
       // Submit quiz completion
       if (quiz) {
-        console.log('Submitting quiz completion:', quiz._id);
         const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || '/api'}/quiz/${quiz._id}/complete`, {
           credentials: 'include',
           method: 'POST',
