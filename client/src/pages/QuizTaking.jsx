@@ -215,11 +215,14 @@ export default function QuizTaking() {
           // Load existing answers
           const existingAnswers = {};
           if (progress.answers) {
+            console.log('Processing saved answers:', progress.answers);
             progress.answers.forEach(answer => {
+              console.log('Answer:', answer);
               existingAnswers[answer.questionId] = answer.chosenAnswer;
             });
           }
           setAnswers(existingAnswers);
+          console.log('Set answers to:', existingAnswers);
         } else {
           // Start new attempt
           await startQuizAttempt(quizId, quizData);
