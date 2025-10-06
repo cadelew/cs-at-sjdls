@@ -23,8 +23,12 @@ export default function UserDashboard() {
       
       // Fetch analytics and history in parallel
       const [analyticsResponse, historyResponse] = await Promise.all([
-        fetch(`/api/analytics/user/${currentUser._id}`),
-        fetch(`/api/analytics/user/${currentUser._id}/history?limit=10`)
+        fetch(`${import.meta.env.VITE_API_BASE_URL || '/api'}/analytics/user/${currentUser._id}`, {
+          credentials: 'include'
+        }),
+        fetch(`${import.meta.env.VITE_API_BASE_URL || '/api'}/analytics/user/${currentUser._id}/history?limit=10`, {
+          credentials: 'include'
+        })
       ]);
 
       if (analyticsResponse.ok) {

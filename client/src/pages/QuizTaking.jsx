@@ -383,12 +383,6 @@ export default function QuizTaking() {
   const handleSubmitQuiz = async () => {
     if (submitting) return;
     
-      quizId: quiz?._id, 
-      currentUser: currentUser?.username, 
-      userId: currentUser?._id,
-      answersCount: Object.keys(answers).length 
-    });
-    
     try {
       setSubmitting(true);
       setHasUnsavedProgress(false); // Clear unsaved progress flag
