@@ -1,8 +1,10 @@
 import Quiz from '../models/quiz.model.js';
 import { errorHandler } from '../utils/error.js';
 import QuizGenerationService from '../services/quizGenerationService.js';
+import QuizLifecycleService from '../services/quizLifecycleService.js';
 
 const quizGenerationService = new QuizGenerationService();
+const quizLifecycleService = new QuizLifecycleService();
 
 
 export const getQuizzes = async (req, res, next) => {
@@ -324,6 +326,199 @@ export const getQuizCategories = async (req, res, next) => {
 
     } catch (error) {
         console.error('Error in getQuizCategories:', error);
+        next(error);
+    }
+}
+
+// Get active quizzes for a category/subcategory
+export const getActiveQuizzes = async (req, res, next) => {
+    try {
+        const { category, subcategory = 'general' } = req.params;
+        const userId = req.user?.id || null;
+
+        const activeQuizzes = await quizLifecycleService.getActiveQuizzes(category, subcategory, userId);
+
+        res.status(200).json({
+            success: true,
+            quizzes: activeQuizzes,
+            count: activeQuizzes.length,
+            category,
+            subcategory
+        });
+
+    } catch (error) {
+        console.error('Error in getActiveQuizzes:', error);
+        next(error);
+    }
+}
+
+// Get user's quiz history
+export const getUserQuizHistory = async (req, res, next) => {
+    try {
+        const userId = req.user?.id;
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: 'User authentication required'
+            });
+        }
+
+        const {
+            category = null,
+            subcategory = null,
+            limit = 20,
+            page = 1
+        } = req.query;
+
+        const history = await quizLifecycleService.getUserQuizHistory(userId, {
+            category,
+            subcategory,
+            limit: parseInt(limit),
+            page: parseInt(page)
+        });
+
+        res.status(200).json({
+            success: true,
+            history,
+            count: history.length,
+            pagination: {
+                page: parseInt(page),
+                limit: parseInt(limit),
+                hasMore: history.length === parseInt(limit)
+            }
+        });
+
+    } catch (error) {
+        console.error('Error in getUserQuizHistory:', error);
+        next(error);
+    }
+}
+
+// Complete a quiz and move to history
+export const completeQuiz = async (req, res, next) => {
+    try {
+        const { quizId } = req.params;
+        const userId = req.user?.id;
+        
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: 'User authentication required'
+            });
+        }
+
+        const {
+            score,
+            timeSpent,
+            answers = []
+        } = req.body;
+
+        if (score === undefined || timeSpent === undefined) {
+            return res.status(400).json({
+                success: false,
+                message: 'Score and timeSpent are required'
+            });
+        }
+
+        const result = await quizLifecycleService.completeQuiz(quizId, userId, {
+            score,
+            timeSpent,
+            answers
+        });
+
+        res.status(200).json(result);
+
+    } catch (error) {
+        console.error('Error in completeQuiz:', error);
+        next(error);
+    }
+}
+
+// Retake a quiz from history
+export const retakeQuiz = async (req, res, next) => {
+    try {
+        const { quizId } = req.params;
+        const userId = req.user?.id;
+        
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: 'User authentication required'
+            });
+        }
+
+        const result = await quizLifecycleService.retakeQuiz(quizId, userId);
+
+        res.status(201).json(result);
+
+    } catch (error) {
+        console.error('Error in retakeQuiz:', error);
+        next(error);
+    }
+}
+
+// Get quiz lifecycle statistics
+export const getQuizLifecycleStats = async (req, res, next) => {
+    try {
+        const stats = await quizLifecycleService.getQuizStats();
+
+        res.status(200).json({
+            success: true,
+            stats
+        });
+
+    } catch (error) {
+        console.error('Error in getQuizLifecycleStats:', error);
+        next(error);
+    }
+}
+
+// Initialize active quiz pools (admin endpoint)
+export const initializeQuizPools = async (req, res, next) => {
+    try {
+        await quizLifecycleService.initializeActiveQuizPools();
+
+        res.status(200).json({
+            success: true,
+            message: 'Active quiz pools initialized successfully'
+        });
+
+    } catch (error) {
+        console.error('Error in initializeQuizPools:', error);
+        next(error);
+    }
+}
+
+// Archive old quizzes (admin endpoint)
+export const archiveOldQuizzes = async (req, res, next) => {
+    try {
+        const archivedCount = await quizLifecycleService.archiveOldQuizzes();
+
+        res.status(200).json({
+            success: true,
+            message: `Archived ${archivedCount} old quizzes`,
+            archivedCount
+        });
+
+    } catch (error) {
+        console.error('Error in archiveOldQuizzes:', error);
+        next(error);
+    }
+}
+
+// Cleanup expired quizzes (admin endpoint)
+export const cleanupExpiredQuizzes = async (req, res, next) => {
+    try {
+        const deletedCount = await quizLifecycleService.cleanupExpiredQuizzes();
+
+        res.status(200).json({
+            success: true,
+            message: `Cleaned up ${deletedCount} expired quizzes`,
+            deletedCount
+        });
+
+    } catch (error) {
+        console.error('Error in cleanupExpiredQuizzes:', error);
         next(error);
     }
 }

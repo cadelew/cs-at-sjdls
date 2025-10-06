@@ -24,6 +24,24 @@ const quizSchema = new mongoose.Schema({
         default: 'general'
     },
     tags: [String], // Additional tags for filtering
+    status: {
+        type: String,
+        enum: ['active', 'completed', 'archived'],
+        default: 'active'
+    },
+    completedBy: [{
+        userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        completedAt: { type: Date, default: Date.now },
+        score: Number,
+        timeSpent: Number, // in minutes
+        answers: [{
+            questionId: mongoose.Schema.Types.ObjectId,
+            selectedAnswer: Number,
+            isCorrect: Boolean,
+            timeSpent: Number // seconds per question
+        }]
+    }],
+    expiresAt: { type: Date, default: () => new Date(Date.now() + 90 * 24 * 60 * 60 * 1000) }, // 90 days from creation
     metadata: {
         distribution: {
             bigIdea: mongoose.Schema.Types.Mixed,
