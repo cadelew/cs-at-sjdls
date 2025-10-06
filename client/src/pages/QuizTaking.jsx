@@ -553,13 +553,19 @@ export default function QuizTaking() {
              currentQuestionData.questionsText.includes('facing >') ||
              currentQuestionData.questionsText.includes('facing v') ||
              currentQuestionData.questionsText.includes('facing ^') ||
-             currentQuestionData.questionsText.includes('facing <') ? (
+             currentQuestionData.questionsText.includes('facing <') ||
+             currentQuestionData.questionsText.includes('```') ||
+             currentQuestionData.questionsText.includes('def ') ||
+             currentQuestionData.questionsText.includes('function ') ||
+             currentQuestionData.questionsText.includes('for ') ||
+             currentQuestionData.questionsText.includes('while ') ||
+             currentQuestionData.questionsText.includes('if ') ? (
               <pre className="whitespace-pre-wrap font-mono text-sm bg-gray-100 dark:bg-gray-800 p-4 rounded-lg border border-gray-300 dark:border-gray-600">
                 {currentQuestionData.questionsText.replace(/\\n/g, '\n')}
               </pre>
             ) : (
               <h2 className="text-xl font-semibold">
-                {currentQuestionData.questionsText}
+                {currentQuestionData.questionsText.replace(/\\n/g, '\n')}
               </h2>
             )}
           </div>

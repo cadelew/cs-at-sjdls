@@ -2,6 +2,8 @@ import OpenAI from 'openai';
 import Question from '../models/question.model.js';
 import RobotQuestionValidator from './questionValidator.js';
 
+
+//Comment out robot navigation if not working. This commit it doesn't work.
 // Initialize OpenAI client lazily
 let openai = null;
 const getOpenAI = () => {
@@ -13,30 +15,30 @@ const getOpenAI = () => {
   return openai;
 };
 
-// Question generation prompts for different types
+// Question generation prompts for different types with enhanced diversity
 const GENERATION_PROMPTS = {
-  // robot_navigation: {
-  //   prompt: `Generate a robot grid navigation question with ASCII art showing robot position, direction, and goal. Include 4 pseudocode options with only one correct answer.`,
-  //   validator: RobotQuestionValidator
-  // },
+  robot_navigation: {
+    prompt: `Generate an AP CSP robot grid navigation question with ASCII art showing robot position, direction, and goal. Focus on computational thinking, algorithm design, and step-by-step problem solving. Include 4 pseudocode options with only one correct answer. Use varied grid sizes (3x3, 4x4, 5x5) and different starting positions.`,
+    validator: RobotQuestionValidator
+  },
   
   code_analysis: {
-    prompt: `Generate a code analysis question where students must trace through code execution, predict output, or identify bugs. Include 4 multiple choice options.`,
+    prompt: `Generate an AP CSP code analysis question focusing on programming concepts like variables, conditionals, loops, functions, and debugging. Topics should include: program tracing, identifying syntax/logic errors, predicting output, understanding control structures. Use diverse numbers (7, 12, 15, 20, 25, 30, 50, 100), function names (calculate_score, find_average, process_data, check_validity), and realistic programming scenarios. Include 4 multiple choice options.`,
     validator: null // Will implement later
   },
   
   algorithm: {
-    prompt: `Generate an algorithm question about sorting, searching, or optimization. Include pseudocode and ask students to analyze efficiency or correctness.`,
+    prompt: `Generate an AP CSP algorithm question focusing on computational thinking, algorithm design, and efficiency. Topics should include: searching algorithms, sorting algorithms, algorithm complexity, step-by-step problem solving, optimization. Use diverse data sizes (arrays of 8, 15, 24, 33 elements), algorithm types (linear search, binary search, bubble sort, selection sort), and real-world computational problems. Include 4 multiple choice options.`,
     validator: null // Will implement later
   },
   
   data_structure: {
-    prompt: `Generate a data structure question about arrays, lists, stacks, or queues. Include operations and ask students to predict results.`,
+    prompt: `Generate an AP CSP data structure question focusing on data organization, representation, and manipulation. Topics should include: binary representation, data types, lists/arrays, data compression, data privacy, data analysis. Use varied data types (strings, integers, booleans), sizes (5, 12, 18, 25 items), and operations (storing, retrieving, organizing data). Include 4 multiple choice options.`,
     validator: null // Will implement later
   },
   
   problem_solving: {
-    prompt: `Generate a problem-solving question requiring decomposition, abstraction, or pattern recognition. Include step-by-step solution approach.`,
+    prompt: `Generate an AP CSP computational thinking problem focusing on decomposition, pattern recognition, abstraction, and algorithm design. Topics should include: breaking down complex problems, identifying patterns in data, creating abstractions, designing algorithms. Use varied contexts (programming challenges, data analysis, simulation, optimization) and different numbers (7, 12, 15, 20, 25, 30, 50, 100) and scenarios. Include 4 multiple choice options.`,
     validator: null // Will implement later
   }
 };
@@ -53,7 +55,7 @@ const BIG_IDEAS = {
 class QuestionGenerationService {
   constructor() {
     this.validators = {
-      // robot_navigation: new RobotQuestionValidator() // Commented out for now
+      robot_navigation: new RobotQuestionValidator()
     };
   }
 
@@ -149,9 +151,9 @@ class QuestionGenerationService {
       5: 24   // Impact of Computing (21-26%)
     };
     const defaultQuestionType = { 
-      // robot_navigation: 40, // Commented out for now
-      code_analysis: 40, 
-      algorithm: 30, 
+      robot_navigation: 10, // Reduced frequency - only 10% of questions comment out if not working
+      code_analysis: 35, 
+      algorithm: 25, 
       data_structure: 20, 
       problem_solving: 10 
     };
@@ -199,28 +201,35 @@ class QuestionGenerationService {
       throw new Error(`Unsupported question type: ${questionType}`);
     }
 
-    const prompt = `
-${promptConfig.prompt}
-
-Requirements:
-- Topic: ${topic || BIG_IDEAS[bigIdea]}
-- Difficulty: ${difficulty}
-- Big Idea: ${bigIdea} - ${BIG_IDEAS[bigIdea]}
-
-Format the response as JSON:
-{
-  "questionsText": "Question text here",
-  "options": ["Option 1", "Option 2", "Option 3", "Option 4"],
-  "correctAnswer": 0,
-  "explanation": "Explanation of the correct answer",
-  "topic": "${topic || BIG_IDEAS[bigIdea]}",
-  "bigIdea": ${bigIdea},
-  "questionType": "${questionType}",
-  "difficulty": "${difficulty}",
-  "points": 5,
-  "tags": ["tag1", "tag2", "tag3"]
-}
-`;
+           const prompt = `
+       ${promptConfig.prompt}
+       
+       Requirements:
+       - Topic: ${topic || BIG_IDEAS[bigIdea]}
+       - Difficulty: ${difficulty}
+       - Big Idea: ${bigIdea} - ${BIG_IDEAS[bigIdea]}
+       
+       DIVERSITY REQUIREMENTS (CRITICAL):
+       - Use RANDOM numbers from this list: [7, 12, 15, 18, 20, 25, 30, 35, 42, 50, 75, 100, 150, 200]
+       - Use VARIED function names: analyze_data, process_items, compute_result, find_solution, calculate_value, sort_elements, search_items, etc.
+       - Use DIFFERENT variable names: data_list, numbers, items, values, results, output, etc.
+       - Create UNIQUE scenarios and contexts
+       - Avoid common patterns like "sum of first n numbers" or "two sum problem"
+       
+       Format the response as JSON:
+       {
+         "questionsText": "Question text here",
+         "options": ["Option 1", "Option 2", "Option 3", "Option 4"],
+         "correctAnswer": 0,
+         "explanation": "Explanation of the correct answer",
+         "topic": "${topic || BIG_IDEAS[bigIdea]}",
+         "bigIdea": ${bigIdea},
+         "questionType": "${questionType}",
+         "difficulty": "${difficulty}",
+         "points": 5,
+         "tags": ["tag1", "tag2", "tag3"]
+       }
+       `;
 
     try {
       const response = await getOpenAI().chat.completions.create({
@@ -265,7 +274,7 @@ Format the response as JSON:
     }
   }
 
-  // Validate non-robot questions using GPT
+  // Validate non-robot questions using GPT comment ouot if not working
   async validateQuestionWithGPT(question) {
     try {
       const prompt = `

@@ -4,7 +4,23 @@ import { errorHandler } from '../utils/error.js';
 export const getQuestions = async (req, res, next) => {
     const { id } = req.params;
     try {
-        const questions = await Question.find({ quizId: id});
+        // First, try to get the quiz to see if it's a generated quiz with questionIds
+        const Quiz = (await import('../models/quiz.model.js')).default;
+        const quiz = await Quiz.findById(id);
+        
+        let questions = [];
+        
+        if (quiz && quiz.questionIds && quiz.questionIds.length > 0) {
+            // New format: quiz has questionIds array
+            questions = await Question.find({ 
+                _id: { $in: quiz.questionIds },
+                'metadata.isActive': true 
+            }).sort({ createdAt: 1 }); // Maintain order
+        } else {
+            // Old format: questions have quizId field
+            questions = await Question.find({ quizId: id });
+        }
+        
         if (questions.length === 0) {
             return next(errorHandler(404, 'Questions not found'));
         }

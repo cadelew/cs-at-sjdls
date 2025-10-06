@@ -271,12 +271,18 @@ export default function QuizResults() {
                        question.questionsText.includes('facing >') ||
                        question.questionsText.includes('facing v') ||
                        question.questionsText.includes('facing ^') ||
-                       question.questionsText.includes('facing <') ? (
+                       question.questionsText.includes('facing <') ||
+                       question.questionsText.includes('```') ||
+                       question.questionsText.includes('def ') ||
+                       question.questionsText.includes('function ') ||
+                       question.questionsText.includes('for ') ||
+                       question.questionsText.includes('while ') ||
+                       question.questionsText.includes('if ') ? (
                         <pre className="whitespace-pre-wrap font-mono text-sm bg-gray-100 dark:bg-gray-800 p-4 rounded-lg border border-gray-300 dark:border-gray-600">
                           {question.questionsText.replace(/\\n/g, '\n')}
                         </pre>
                       ) : (
-                        <p>{question.questionsText}</p>
+                        <p>{question.questionsText.replace(/\\n/g, '\n')}</p>
                       )}
                     </div>
                     
