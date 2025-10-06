@@ -18,6 +18,7 @@ export default function QuizTaking() {
   const [isResumed, setIsResumed] = useState(false);
   const [showSaveNotification, setShowSaveNotification] = useState(false);
   const [hasUnsavedProgress, setHasUnsavedProgress] = useState(false);
+  const [isStartingQuiz, setIsStartingQuiz] = useState(false);
   const timeRemainingRef = useRef(null);
 
   useEffect(() => {
@@ -173,6 +174,11 @@ export default function QuizTaking() {
   };
 
   const checkForExistingAttempt = async (quizId, quizData) => {
+    if (isStartingQuiz) {
+      console.log('Already starting quiz, skipping duplicate call');
+      return;
+    }
+    
     try {
       const userId = currentUser?._id || 'anonymous';
       console.log('Checking for existing attempt:', { quizId, userId, currentUser: currentUser?.username });
@@ -224,6 +230,12 @@ export default function QuizTaking() {
   };
 
   const startQuizAttempt = async (quizId, quizData) => {
+    if (isStartingQuiz) {
+      console.log('Already starting quiz, skipping duplicate call');
+      return;
+    }
+    
+    setIsStartingQuiz(true);
     try {
       console.log('Starting quiz:', { quizId, currentUser: currentUser?.username });
       
@@ -253,6 +265,8 @@ export default function QuizTaking() {
     } catch (err) {
       console.error('Error starting quiz attempt:', err);
       // Continue without tracking for now
+    } finally {
+      setIsStartingQuiz(false);
     }
   };
 
