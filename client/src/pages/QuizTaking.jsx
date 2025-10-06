@@ -30,6 +30,7 @@ export default function QuizTaking() {
   // Re-fetch quiz data when user changes
   useEffect(() => {
     if (id && currentUser) {
+      console.log('User changed, refetching quiz data');
       fetchQuizData();
     }
   }, [currentUser]);
@@ -190,12 +191,16 @@ export default function QuizTaking() {
       
       if (response.ok) {
         const responseData = await response.json();
+        console.log('In-progress quizzes response:', responseData);
         const inProgressQuizzes = responseData.quizzes || [];
+        console.log('In-progress quizzes array:', inProgressQuizzes);
         const currentQuizProgress = inProgressQuizzes.find(q => q._id === quizId);
+        console.log('Current quiz progress:', currentQuizProgress);
         
         if (currentQuizProgress && currentQuizProgress.progressInfo) {
           // Resume existing attempt
           const progress = currentQuizProgress.progressInfo;
+          console.log('Resuming with progress:', progress);
           setCurrentQuestion(progress.currentQuestion || 0);
           setIsResumed(true);
           
