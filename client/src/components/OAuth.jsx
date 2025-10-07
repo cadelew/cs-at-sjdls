@@ -1,88 +1,59 @@
-import { GoogleAuthProvider, signInWithRedirect, getRedirectResult } from 'firebase/auth';
+import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { auth } from '../firebase';
 import { useDispatch } from 'react-redux';
 import { signInSuccess } from '../redux/user/userSlice';
 import { useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
 
 export default function OAuth() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // Handle redirect result on component mount
-  useEffect(() => {
-    const handleRedirectResult = async () => {
-      try {
-        console.log('Checking for redirect result...');
-        console.log('Current URL:', window.location.href);
-        console.log('Current pathname:', window.location.pathname);
-        console.log('URL search params:', window.location.search);
-        console.log('URL hash:', window.location.hash);
-        console.log('All URL parts:', {
-          href: window.location.href,
-          pathname: window.location.pathname,
-          search: window.location.search,
-          hash: window.location.hash,
-          origin: window.location.origin
-        });
-        const result = await getRedirectResult(auth);
-        console.log('Redirect result:', result);
-        if (result) {
-          console.log('User data from Firebase:', {
-            name: result.user.displayName,
-            email: result.user.email,
-            photo: result.user.photoURL,
-          });
-          
-          const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || '/api'}/auth/google`, {
-            method: 'POST',
-            credentials: 'include',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              name: result.user.displayName,
-              email: result.user.email,
-              photo: result.user.photoURL,
-            }),
-          });
-          
-          console.log('Google auth response status:', res.status);
-          const data = await res.json();
-          console.log('Google auth response data:', data);
-          
-          if (res.ok) {
-            dispatch(signInSuccess(data));
-            navigate('/dashboard');
-          } else {
-            console.error('Google auth failed:', data);
-          }
-        }
-      } catch (error) {
-        console.error('Redirect result error:', error);
-      }
-    };
-
-    handleRedirectResult();
-  }, [dispatch, navigate]);
+  // No longer needed for popup method
   const handleGoogleClick = async () => {
     try {
       console.log('Starting Google sign-in...');
       const provider = new GoogleAuthProvider();
       
-      // Set custom parameters to use Vercel domain for redirect
-      provider.setCustomParameters({
-        redirect_uri: 'https://cs-at-sjdls.vercel.app/sign-in'
-      });
-      
       console.log('Provider created:', provider);
       console.log('Current URL:', window.location.href);
-      console.log('Using Vercel redirect URI');
+      console.log('Using popup method for better Vercel compatibility');
       
-      // Use redirect instead of popup for better reliability
-      console.log('Calling signInWithRedirect...');
-      await signInWithRedirect(auth, provider);
-      console.log('Redirect initiated successfully');
+      // Use popup method for better reliability with Vercel
+      console.log('Calling signInWithPopup...');
+      const result = await signInWithPopup(auth, provider);
+      console.log('Popup sign-in successful:', result);
+      
+      if (result && result.user) {
+        console.log('User data from Firebase:', {
+          name: result.user.displayName,
+          email: result.user.email,
+          photo: result.user.photoURL,
+        });
+        
+        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || '/api'}/auth/google`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: result.user.displayName,
+            email: result.user.email,
+            photo: result.user.photoURL,
+          }),
+        });
+        
+        console.log('Google auth response status:', res.status);
+        const data = await res.json();
+        console.log('Google auth response data:', data);
+        
+        if (res.ok) {
+          dispatch(signInSuccess(data));
+          navigate('/dashboard');
+        } else {
+          console.error('Google auth failed:', data);
+        }
+      }
     } catch (error) {
       console.error('Could not login with google:', error);
     }
