@@ -70,8 +70,14 @@ export default function OAuth() {
       console.log('Starting Google sign-in...');
       const provider = new GoogleAuthProvider();
       
+      // Set custom parameters to use Vercel domain for redirect
+      provider.setCustomParameters({
+        redirect_uri: 'https://cs-at-sjdls.vercel.app/sign-in'
+      });
+      
       console.log('Provider created:', provider);
       console.log('Current URL:', window.location.href);
+      console.log('Using Vercel redirect URI');
       
       // Use redirect instead of popup for better reliability
       console.log('Calling signInWithRedirect...');
