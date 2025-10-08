@@ -2,20 +2,35 @@ import Quiz from '../models/quiz.model.js';
 import { errorHandler } from '../utils/error.js';
 import QuizGenerationService from '../services/quizGenerationService.js';
 import QuizLifecycleService from '../services/quizLifecycleService.js';
+import cacheManager from '../utils/cacheManager.js';
 
 const quizGenerationService = new QuizGenerationService();
 const quizLifecycleService = new QuizLifecycleService();
 
 
 export const getQuizzes = async (req, res, next) => {
-    const { sortBy, order } = req.query;
+    const { sortBy, order, category } = req.query;
     const allowedSortBy = ['topic', 'difficulty', 'timeLimit', 'totalQuestions', 'title'];
     const sortField = allowedSortBy.includes(sortBy) ? sortBy : 'title';
     const sortOrder = order === 'asc' ? 1 : -1;
     
     try {
-        const quizzes = await Quiz.find({ isActive: true }).sort({ [sortField]: sortOrder });
-        res.status(200).json(quizzes);
+        // Use cache-first strategy for better performance
+        const result = await cacheManager.getActiveQuizzes(category);
+        
+        // Apply sorting to cached or fresh data
+        const sortedQuizzes = result.data.sort((a, b) => {
+            const aVal = a[sortField] || '';
+            const bVal = b[sortField] || '';
+            return sortOrder === 1 ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+        });
+        
+        res.status(200).json({
+            data: sortedQuizzes,
+            source: result.source,
+            latency: result.latency,
+            cached: result.source === 'cache'
+        });
     } catch (error) {
         next(error);
     }
@@ -24,7 +39,11 @@ export const getQuizzes = async (req, res, next) => {
 export const getQuiz = async (req, res, next) => {
     const { id } = req.params;
     try {
-        const quiz = await Quiz.findById(id);
+        // Use lean() and select() for faster queries
+        const quiz = await Quiz.findById(id)
+            .lean()
+            .select('title description category subcategory totalQuestions timeLimit status questionIds metadata');
+        
         if (!quiz) {
             return next(errorHandler(404, 'Quiz not found'));
         }

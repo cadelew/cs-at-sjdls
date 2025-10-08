@@ -1,5 +1,6 @@
 import Question from '../models/question.model.js';
 import { errorHandler } from '../utils/error.js';
+import cacheManager from '../utils/cacheManager.js';
 
 export const getQuestions = async (req, res, next) => {
     const { id } = req.params;
@@ -11,14 +12,19 @@ export const getQuestions = async (req, res, next) => {
         let questions = [];
         
         if (quiz && quiz.questionIds && quiz.questionIds.length > 0) {
-            // New format: quiz has questionIds array
+            // New format: quiz has questionIds array - use lean() for speed
             questions = await Question.find({ 
                 _id: { $in: quiz.questionIds },
                 'metadata.isActive': true 
-            }).sort({ createdAt: 1 }); // Maintain order
+            })
+            .lean()
+            .select('questionsText options correctAnswer explanation difficulty bigIdea questionType')
+            .sort({ createdAt: 1 }); // Maintain order
         } else {
-            // Old format: questions have quizId field
-            questions = await Question.find({ quizId: id });
+            // Old format: questions have quizId field - use lean() for speed
+            questions = await Question.find({ quizId: id })
+                .lean()
+                .select('questionsText options correctAnswer explanation difficulty bigIdea questionType');
         }
         
         if (questions.length === 0) {
@@ -29,6 +35,28 @@ export const getQuestions = async (req, res, next) => {
         next(error);
     }
 }
+
+export const getQuestionsByType = async (req, res, next) => {
+    try {
+        const { type, limit = 10 } = req.query;
+        
+        if (!type) {
+            return next(errorHandler(400, 'Question type is required'));
+        }
+        
+        const result = await cacheManager.getQuestionsByType(type, parseInt(limit));
+        
+        res.status(200).json({
+            data: result.data,
+            source: result.source,
+            latency: result.latency,
+            cached: result.source === 'cache',
+            count: result.data.length
+        });
+    } catch (error) {
+        next(error);
+    }
+};
 
 // Get questions from question bank based on filters
 export const getQuestionBank = async (req, res, next) => {
