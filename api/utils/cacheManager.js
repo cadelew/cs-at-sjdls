@@ -53,7 +53,7 @@ class CacheManager {
                 
                 return Quiz.find(filter)
                     .lean()
-                    .select('title category subcategory totalQuestions timeLimit status')
+                    .select('title category subcategory totalQuestions timeLimit status questionIds')
                     .limit(20);
             },
             600000 // 10 min cache

@@ -69,10 +69,10 @@ export default function QuizList() {
       
       setQuizzes(sortedQuizzes);
       
-      // Set question counts (already available in quiz data)
+      // Set question counts (use totalQuestions or questionIds.length as fallback)
       const counts = {};
       sortedQuizzes.forEach(quiz => {
-        counts[quiz._id] = quiz.totalQuestions || 0;
+        counts[quiz._id] = quiz.totalQuestions || quiz.questionIds?.length || 0;
       });
       setQuestionCounts(counts);
       setError(null);
@@ -276,7 +276,7 @@ export default function QuizList() {
               <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-                    {questionCounts[quiz._id] || quiz.totalQuestions || '?'}
+                    {questionCounts[quiz._id] || quiz.totalQuestions || quiz.questionIds?.length || '?'}
                   </div>
                   <div className="text-gray-600 dark:text-gray-400">Questions</div>
                 </div>
