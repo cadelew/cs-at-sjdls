@@ -297,7 +297,7 @@ export default function QuizList() {
                       : 'bg-purple-600 hover:bg-purple-700 text-white'
                   }`}
                 >
-                  {quiz.actionText || (quiz.isInProgress ? 'Resume Quiz' : 'Start Quiz')}
+                  {quiz.isInProgress ? 'Resume Quiz' : 'Start Quiz'}
                 </Link>
               </div>
             </div>
