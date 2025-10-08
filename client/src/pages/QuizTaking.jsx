@@ -639,13 +639,35 @@ export default function QuizTaking() {
                   )}
                 </div>
                 <span className="text-black dark:text-white">
-                  {option.includes('ROTATE') || option.includes('MOVE_FORWARD') || option.includes('REPEAT') ? (
-                    <pre className="whitespace-pre-wrap font-mono text-sm bg-gray-100 dark:bg-gray-800 p-2 rounded border border-gray-300 dark:border-gray-600">
-                      {option.replace(/\\n/g, '\n')}
-                    </pre>
-                  ) : (
-                    option.replace(/\\n/g, '\n')
-                  )}
+                  {(() => {
+                    // Check if option contains code-like patterns
+                    const codePatterns = [
+                      /ROTATE|MOVE_FORWARD|REPEAT|TURN_LEFT|TURN_RIGHT|MOVE|JUMP/i,
+                      /function\s*\(|def\s+\w+|class\s+\w+|import\s+|from\s+/i,
+                      /\w+\s*=\s*[\{\[\(]|\w+\s*\(\s*\)|\w+\s*\{|\w+\s*\[/i,
+                      /if\s*\(|else\s*\{|while\s*\(|for\s*\(/i,
+                      /\{\s*[\w\s,]*\}|\[\s*[\w\s,]*\]/i,
+                      /console\.log|print\s*\(|return\s+/i,
+                      /var\s+\w+|let\s+\w+|const\s+\w+/i,
+                      /true|false|null|undefined/i,
+                      /[{}();]/ // Contains common code punctuation
+                    ];
+                    
+                    const hasCodePattern = codePatterns.some(pattern => pattern.test(option));
+                    const hasMultipleLines = option.includes('\\n') || option.includes('\n');
+                    const isLongText = option.length > 100;
+                    
+                    // Display as code block if it has code patterns, multiple lines, or is long text
+                    if (hasCodePattern || hasMultipleLines || isLongText) {
+                      return (
+                        <pre className="whitespace-pre-wrap font-mono text-sm bg-gray-100 dark:bg-gray-800 p-3 rounded border border-gray-300 dark:border-gray-600 overflow-x-auto">
+                          {option.replace(/\\n/g, '\n')}
+                        </pre>
+                      );
+                    }
+                    
+                    return option.replace(/\\n/g, '\n');
+                  })()}
                 </span>
               </label>
             ))}
