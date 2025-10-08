@@ -12,9 +12,7 @@ class DiversityEnforcer {
         this.forbiddenPatterns = [
             'sum of first n numbers',
             'two sum problem',
-            'unsorted array of integers and a target sum',
-            'calculates the sum of',
-            'function that calculates'
+            'unsorted array of integers and a target sum'
         ];
         
         this.preferredNumbers = ['7', '12', '18', '25', '35', '42', '75', '150', '200', '300']; // Changed from requiredNumbers
@@ -30,6 +28,12 @@ class DiversityEnforcer {
         const violations = [];
         const text = questionText.toLowerCase();
         
+        // Check for missing data references (more specific)
+        if ((text.includes('provided dataset') || text.includes('given data')) && 
+            !text.includes('[') && !text.includes('{') && !text.includes('=')) {
+            violations.push('References data without providing it - include all necessary data in question text');
+        }
+        
         // Count common numbers usage
         let commonNumberCount = 0;
         for (const num of this.commonNumbers) {
@@ -37,8 +41,8 @@ class DiversityEnforcer {
             commonNumberCount += matches;
         }
         
-        // If more than 2 common numbers, suggest improvement
-        if (commonNumberCount > 2) {
+        // If more than 5 common numbers, suggest improvement (more lenient)
+        if (commonNumberCount > 5) {
             violations.push(`Uses too many common numbers (${commonNumberCount}): prefer ${this.preferredNumbers.join(', ')}`);
         }
         
@@ -198,5 +202,10 @@ async function enforceDiversity() {
     }
 }
 
-// Run the diversity enforcement
-enforceDiversity();
+// Export the DiversityEnforcer class
+export default DiversityEnforcer;
+
+// Only run if this file is executed directly, not when imported
+if (import.meta.url === `file://${process.argv[1]}`) {
+    enforceDiversity();
+}

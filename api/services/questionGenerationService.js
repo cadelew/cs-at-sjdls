@@ -23,22 +23,38 @@ const GENERATION_PROMPTS = {
   },
   
   code_analysis: {
-    prompt: `Generate an AP CSP code analysis question focusing on programming concepts like variables, conditionals, loops, functions, and debugging. Topics should include: program tracing, identifying syntax/logic errors, predicting output, understanding control structures. Use diverse numbers (7, 12, 15, 20, 25, 30, 50, 100), function names (calculate_score, find_average, process_data, check_validity), and realistic programming scenarios. Include 4 multiple choice options.`,
+    prompt: `Generate an AP CSP code analysis question focusing on programming concepts like variables, conditionals, loops, functions, and debugging. Topics should include: program tracing, identifying syntax/logic errors, predicting output, understanding control structures. Use diverse numbers (7, 12, 15, 20, 25, 30, 50, 100), function names (calculate_score, find_average, process_data, check_validity), and realistic programming scenarios. 
+
+CRITICAL: Always include ALL necessary data, code, or datasets directly in the question text. Never reference "the provided dataset" or "the given code" without actually providing it. Students must be able to answer the question using only the information in the question text.
+
+Include 4 multiple choice options.`,
     validator: null // Will implement later
   },
   
   algorithm: {
-    prompt: `Generate an AP CSP algorithm question focusing on computational thinking, algorithm design, and efficiency. Topics should include: searching algorithms, sorting algorithms, algorithm complexity, step-by-step problem solving, optimization. Use diverse data sizes (arrays of 8, 15, 24, 33 elements), algorithm types (linear search, binary search, bubble sort, selection sort), and real-world computational problems. Include 4 multiple choice options.`,
+    prompt: `Generate an AP CSP algorithm question focusing on computational thinking, algorithm design, and efficiency. Topics should include: searching algorithms, sorting algorithms, algorithm complexity, step-by-step problem solving, optimization. Use diverse data sizes (arrays of 8, 15, 24, 33 elements), algorithm types (linear search, binary search, bubble sort, selection sort), and real-world computational problems. 
+
+CRITICAL: Always include ALL necessary data, arrays, or datasets directly in the question text. Never reference "the provided dataset" or "the given array" without actually providing it. Students must be able to answer the question using only the information in the question text.
+
+Include 4 multiple choice options.`,
     validator: null // Will implement later
   },
   
   data_structure: {
-    prompt: `Generate an AP CSP data structure question focusing on data organization, representation, and manipulation. Topics should include: binary representation, data types, lists/arrays, data compression, data privacy, data analysis. Use varied data types (strings, integers, booleans), sizes (5, 12, 18, 25 items), and operations (storing, retrieving, organizing data). Include 4 multiple choice options.`,
+    prompt: `Generate an AP CSP data structure question focusing on data organization, representation, and manipulation. Topics should include: binary representation, data types, lists/arrays, data compression, data privacy, data analysis. Use varied data types (strings, integers, booleans), sizes (5, 12, 18, 25 items), and operations (storing, retrieving, organizing data). 
+
+CRITICAL: Always include ALL necessary data, structures, or examples directly in the question text. Never reference "the provided data" or "the given structure" without actually providing it. Students must be able to answer the question using only the information in the question text.
+
+Include 4 multiple choice options.`,
     validator: null // Will implement later
   },
   
   problem_solving: {
-    prompt: `Generate an AP CSP computational thinking problem focusing on decomposition, pattern recognition, abstraction, and algorithm design. Topics should include: breaking down complex problems, identifying patterns in data, creating abstractions, designing algorithms. Use varied contexts (programming challenges, data analysis, simulation, optimization) and different numbers (7, 12, 15, 20, 25, 30, 50, 100) and scenarios. Include 4 multiple choice options.`,
+    prompt: `Generate an AP CSP computational thinking problem focusing on decomposition, pattern recognition, abstraction, and algorithm design. Topics should include: breaking down complex problems, identifying patterns in data, creating abstractions, designing algorithms. Use varied contexts (programming challenges, data analysis, simulation, optimization) and different numbers (7, 12, 15, 20, 25, 30, 50, 100) and scenarios. 
+
+CRITICAL: Always include ALL necessary data, examples, or context directly in the question text. Never reference "the provided data" or "the given problem" without actually providing it. Students must be able to answer the question using only the information in the question text.
+
+Include 4 multiple choice options.`,
     validator: null // Will implement later
   }
 };
@@ -216,6 +232,13 @@ class QuestionGenerationService {
        - Create UNIQUE scenarios and contexts
        - Avoid common patterns like "sum of first n numbers" or "two sum problem"
        
+       DATA COMPLETENESS REQUIREMENTS (CRITICAL):
+       - ALWAYS include ALL necessary data, code, datasets, or examples directly in the question text
+       - NEVER reference "the provided dataset", "the given code", or "the following data" without actually providing it
+       - Students must be able to answer the question using ONLY the information in the question text
+       - If the question involves data analysis, include the actual data in the question
+       - If the question involves code tracing, include the actual code in the question
+       
        Format the response as JSON:
        {
          "questionsText": "Question text here",
@@ -258,6 +281,13 @@ class QuestionGenerationService {
   async validateQuestion(question, validationRules = {}) {
     const { minValidationScore = 0.8, maxRetries = 3 } = validationRules;
     
+    // Always run diversity validation first
+    const diversityResult = await this.validateDiversity(question);
+    if (!diversityResult.isValid) {
+      console.log(`Diversity validation failed: ${diversityResult.violations.join(', ')}`);
+      return false;
+    }
+    
     const validator = this.validators[question.questionType];
     
     if (!validator) {
@@ -271,6 +301,29 @@ class QuestionGenerationService {
     } catch (error) {
       console.error('Error validating question:', error);
       return false;
+    }
+  }
+
+  // Validate question diversity
+  async validateDiversity(question) {
+    try {
+      // Import the DiversityEnforcer class
+      const module = await import('../enforceQuestionDiversity.js');
+      const DiversityEnforcer = module.default;
+      const diversityChecker = new DiversityEnforcer();
+      
+      const violations = diversityChecker.checkDiversityViolations(question.questionsText);
+      
+      return {
+        isValid: violations.length === 0,
+        violations: violations
+      };
+    } catch (error) {
+      console.error('Error importing diversity enforcer:', error);
+      return {
+        isValid: true, // Skip diversity check if import fails
+        violations: []
+      };
     }
   }
 
@@ -293,6 +346,8 @@ Please check:
 2. Are the incorrect options reasonable but wrong?
 3. Is the explanation accurate?
 4. Is the question clear and unambiguous?
+5. Does the question include ALL necessary data/code/examples in the question text?
+6. Can a student answer this question using ONLY the information provided in the question?
 
 Respond with ONLY valid JSON (no markdown, no code blocks):
 {

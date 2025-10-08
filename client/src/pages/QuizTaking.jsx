@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { apiRequest } from '../utils/api.js';
 
 export default function QuizTaking() {
   const { id } = useParams();
@@ -143,9 +144,7 @@ export default function QuizTaking() {
       setLoading(true);
       
       // Fetch quiz details
-      const quizResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL || '/api'}/quiz/${id}`, {
-        credentials: 'include'
-      });
+      const quizResponse = await apiRequest(`/quiz/${id}`);
       if (!quizResponse.ok) {
         throw new Error('Failed to fetch quiz');
       }
@@ -153,9 +152,7 @@ export default function QuizTaking() {
       setQuiz(quizData);
       
       // Fetch questions
-      const questionsResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL || '/api'}/question/${id}/questions`, {
-        credentials: 'include'
-      });
+      const questionsResponse = await apiRequest(`/question/${id}/questions`);
       if (!questionsResponse.ok) {
         throw new Error('Failed to fetch questions');
       }
@@ -182,9 +179,7 @@ export default function QuizTaking() {
       const userId = currentUser?._id || 'anonymous';
       
       // Check if user has in-progress quizzes
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || '/api'}/quiz/in-progress/user`, {
-        credentials: 'include'
-      });
+      const response = await apiRequest(`/quiz/in-progress/user`);
       
       if (response.ok) {
         const responseData = await response.json();
@@ -246,12 +241,8 @@ export default function QuizTaking() {
     setIsStartingQuiz(true);
     try {
       
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || '/api'}/quiz/${quizId}/start`, {
-        credentials: 'include',
+      const response = await apiRequest(`/quiz/${quizId}/start`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
       });
       
       if (!response.ok) {
@@ -333,12 +324,8 @@ export default function QuizTaking() {
     const currentTimeRemaining = timeRemainingRef.current;
     
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || '/api'}/quiz/${quiz._id}/progress`, {
-        credentials: 'include',
+      const response = await apiRequest(`/quiz/${quiz._id}/progress`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({
           currentQuestion: currentQuestion,
           answers: Object.entries(answers).map(([questionId, chosenAnswer]) => ({
@@ -398,12 +385,8 @@ export default function QuizTaking() {
       
       // Submit quiz completion
       if (quiz) {
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || '/api'}/quiz/${quiz._id}/complete`, {
-          credentials: 'include',
+        const response = await apiRequest(`/quiz/${quiz._id}/complete`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
           body: JSON.stringify({
             score: score,
             timeSpent: totalTimeTaken,
