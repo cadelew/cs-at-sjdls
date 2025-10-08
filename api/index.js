@@ -10,6 +10,7 @@ import quizStatRoutes from './routes/quizStat.route.js';
 import analyticsRoutes from './routes/analytics.route.js';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
+import cacheManager from './utils/cacheManager.js';
 
 dotenv.config({path: './api/.env'});
 
@@ -88,35 +89,6 @@ app.get('/', (req, res) => {
     });
 });
 
-// Performance monitoring endpoint
-app.get('/api/performance', async (req, res) => {
-    try {
-        const cacheManager = (await import('./utils/cacheManager.js')).default;
-        const stats = cacheManager.getCacheStats();
-        
-        res.json({
-            timestamp: new Date().toISOString(),
-            performance: {
-                target: 'sub-25ms',
-                status: 'optimized',
-                cache: {
-                    size: stats.size,
-                    keys: stats.keys,
-                    memoryUsage: `${(stats.memoryUsage / 1024).toFixed(2)} KB`
-                }
-            },
-            optimizations: [
-                'Cache-first query strategy',
-                'Ultra-fast database indexes',
-                'Connection pool optimization',
-                'Response compression',
-                'Query optimization with lean() and select()'
-            ]
-        });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
 
 app.use("/api/user", userRoutes);
 app.use('/api/auth', authRoutes);
