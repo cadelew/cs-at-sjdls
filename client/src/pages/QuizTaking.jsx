@@ -589,18 +589,23 @@ export default function QuizTaking() {
         {/* Question */}
         <div className="bg-amber-50 dark:bg-black border border-black dark:border-purple-500 rounded-lg p-6 mb-6">
           <div className="text-black dark:text-white mb-6">
-            {currentQuestionData.questionsText.includes('robot starts at position') || 
-             currentQuestionData.questionsText.includes('grid below') ||
-             currentQuestionData.questionsText.includes('facing >') ||
-             currentQuestionData.questionsText.includes('facing v') ||
-             currentQuestionData.questionsText.includes('facing ^') ||
-             currentQuestionData.questionsText.includes('facing <') ||
-             currentQuestionData.questionsText.includes('```') ||
-             currentQuestionData.questionsText.includes('def ') ||
-             currentQuestionData.questionsText.includes('function ') ||
-             currentQuestionData.questionsText.includes('for ') ||
-             currentQuestionData.questionsText.includes('while ') ||
-             currentQuestionData.questionsText.includes('if ') ? (
+            {(() => {
+              // Enhanced detection for code-like content in questions
+              const text = currentQuestionData.questionsText;
+              const codePatterns = [
+                'robot starts at position', 'grid below',
+                'facing >', 'facing v', 'facing ^', 'facing <',
+                '```', 'def ', 'function ', 'for ', 'while ', 'if ',
+                'employees_data', 'confidential_access', 'true', 'false',
+                'dictionary', 'list', 'array', '{', '}', '[', ']',
+                'import ', 'from ', 'class ', 'var ', 'let ', 'const ',
+                'console.log', 'print(', 'return ', 'null', 'undefined'
+              ];
+              
+              return codePatterns.some(pattern => text.includes(pattern)) ||
+                     text.length > 200 || // Long text likely contains structured data
+                     text.includes('\\n') || text.includes('\n'); // Multi-line content
+            })() ? (
               <pre className="whitespace-pre-wrap font-mono text-sm bg-gray-100 dark:bg-gray-800 p-4 rounded-lg border border-gray-300 dark:border-gray-600">
                 {currentQuestionData.questionsText.replace(/\\n/g, '\n')}
               </pre>
@@ -638,37 +643,9 @@ export default function QuizTaking() {
                     <div className="w-2 h-2 rounded-full bg-white"></div>
                   )}
                 </div>
-                <span className="text-black dark:text-white">
-                  {(() => {
-                    // Check if option contains code-like patterns
-                    const codePatterns = [
-                      /ROTATE|MOVE_FORWARD|REPEAT|TURN_LEFT|TURN_RIGHT|MOVE|JUMP/i,
-                      /function\s*\(|def\s+\w+|class\s+\w+|import\s+|from\s+/i,
-                      /\w+\s*=\s*[\{\[\(]|\w+\s*\(\s*\)|\w+\s*\{|\w+\s*\[/i,
-                      /if\s*\(|else\s*\{|while\s*\(|for\s*\(/i,
-                      /\{\s*[\w\s,]*\}|\[\s*[\w\s,]*\]/i,
-                      /console\.log|print\s*\(|return\s+/i,
-                      /var\s+\w+|let\s+\w+|const\s+\w+/i,
-                      /true|false|null|undefined/i,
-                      /[{}();]/ // Contains common code punctuation
-                    ];
-                    
-                    const hasCodePattern = codePatterns.some(pattern => pattern.test(option));
-                    const hasMultipleLines = option.includes('\\n') || option.includes('\n');
-                    const isLongText = option.length > 100;
-                    
-                    // Display as code block if it has code patterns, multiple lines, or is long text
-                    if (hasCodePattern || hasMultipleLines || isLongText) {
-                      return (
-                        <pre className="whitespace-pre-wrap font-mono text-sm bg-gray-100 dark:bg-gray-800 p-3 rounded border border-gray-300 dark:border-gray-600 overflow-x-auto">
-                          {option.replace(/\\n/g, '\n')}
-                        </pre>
-                      );
-                    }
-                    
-                    return option.replace(/\\n/g, '\n');
-                  })()}
-                </span>
+                <pre className="whitespace-pre-wrap font-mono text-sm bg-gray-100 dark:bg-gray-800 p-3 rounded border border-gray-300 dark:border-gray-600 overflow-x-auto text-black dark:text-white">
+                  {option.replace(/\\n/g, '\n')}
+                </pre>
               </label>
             ))}
           </div>
